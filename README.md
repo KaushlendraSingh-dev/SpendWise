@@ -1,2 +1,2 @@
-# SpendWise
-SpendWise 💸  SpendWise is a smart and user-friendly personal finance management dashboard built with Firebase and modern UI components. It helps users track their expenses, manage budgets, and gain insights into their spending habits — all in one
+**# SpendWise
+SpendWise 💸  SpendWise is a smart and user-friendly personal finance management dashboard built with Firebase and modern UI components. It helps users track their expenses, manage budgets, and gain insights into their spending habits — all in one**
