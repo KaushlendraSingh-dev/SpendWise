@@ -55,16 +55,21 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
       }
     : {
         category: "",
-        amount: "" as any, // Initialize with empty string
+        amount: "" as any,
       };
   
   useEffect(() => {
-    // Filter out categories that already have a budget, unless we are editing that specific budget
-    const existingBudgetedCategories = budgets.map(b => b.category);
-    const categoriesForSelect = getAllCategories().filter(cat => 
-      !existingBudgetedCategories.includes(cat) || (budget && budget.category === cat)
-    );
-    setAvailableCategories(categoriesForSelect);
+    const allCats = getAllCategories();
+    if (budget) {
+      // When editing, the Select is disabled. We only need budget.category in the list
+      // for the Select component to render its current value correctly.
+      setAvailableCategories([budget.category]);
+    } else {
+      // When adding, show categories that are not yet budgeted.
+      const existingBudgetedCategories = budgets.map(b => b.category);
+      const categoriesForSelect = allCats.filter(cat => !existingBudgetedCategories.includes(cat));
+      setAvailableCategories(categoriesForSelect);
+    }
   }, [getAllCategories, budgets, budget]);
 
 
@@ -85,7 +90,7 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
       }
       addBudget(data);
       toast({ title: "Budget Set", description: `Budget for ${data.category} set successfully.` });
-      form.reset({ category: "", amount: "" as any }); // Reset with empty string
+      form.reset({ category: "", amount: "" as any }); 
     }
     onFormSubmit?.();
     setOpen?.(false);
@@ -107,7 +112,6 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {budget && <SelectItem key={budget.category} value={budget.category}>{budget.category}</SelectItem>}
                   {availableCategories.map((cat) => (
                      <SelectItem key={cat} value={cat}>
                       {cat}
