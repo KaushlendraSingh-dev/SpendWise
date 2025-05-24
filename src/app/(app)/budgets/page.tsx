@@ -18,7 +18,8 @@ export default function BudgetsPage() {
         title="Budgets"
         description="Set and track your monthly spending goals for various categories."
         icon={Target}
-        imageHint="piggybank savings"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/2942/2942269.png"
+        imageHint="budget piggybank"
         actions={
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>

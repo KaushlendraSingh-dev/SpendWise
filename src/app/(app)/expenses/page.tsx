@@ -18,7 +18,8 @@ export default function ExpensesPage() {
         title="Expenses"
         description="Log and manage your daily expenses."
         icon={CreditCard}
-        imageHint="receipts money"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/10758/10758868.png"
+        imageHint="spending money"
         actions={
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
