@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -27,7 +28,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BudgetForm } from "./budget-form";
@@ -43,6 +43,7 @@ export function BudgetList() {
   const budgets = getBudgetProgress();
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
 
   const currencyFormatter = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -52,105 +53,133 @@ export function BudgetList() {
   }
 
   return (
-     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-      <ScrollArea className="h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm"> {/* Adjust height as needed */}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Category</TableHead>
-              <TableHead>Budget Amount</TableHead>
-              <TableHead>Amount Spent</TableHead>
-              <TableHead>Remaining</TableHead>
-              <TableHead>Progress</TableHead>
-              <TableHead className="w-[50px] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {budgets.map((budget) => {
-              const progressValue = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
-              const isOverBudget = budget.spent > budget.amount;
-              return (
-                <TableRow key={budget.id}>
-                  <TableCell className="font-medium">{budget.category}</TableCell>
-                  <TableCell>{currencyFormatter(budget.amount)}</TableCell>
-                  <TableCell className={cn(isOverBudget && "text-destructive")}>{currencyFormatter(budget.spent)}</TableCell>
-                  <TableCell className={cn(budget.remaining < 0 && "text-destructive")}>{currencyFormatter(budget.remaining)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                       <Progress value={Math.min(progressValue,100)} className={cn("w-[100px] h-3", isOverBudget ? "[&>div]:bg-destructive" : "")} />
-                       <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DialogTrigger asChild>
-                          <DropdownMenuItem onClick={() => setSelectedBudget(budget)}>
-                            <Edit2 className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                        </DialogTrigger>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setSelectedBudget(budget)}>
+    <>
+      <Dialog 
+        open={isEditDialogOpen} 
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setSelectedBudget(null);
+          }
+        }}
+      >
+        <ScrollArea className="h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead>Budget Amount</TableHead>
+                <TableHead>Amount Spent</TableHead>
+                <TableHead>Remaining</TableHead>
+                <TableHead>Progress</TableHead>
+                <TableHead className="w-[50px] text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {budgets.map((budget) => {
+                const progressValue = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
+                const isOverBudget = budget.spent > budget.amount;
+                return (
+                  <TableRow key={budget.id}>
+                    <TableCell className="font-medium">{budget.category}</TableCell>
+                    <TableCell>{currencyFormatter(budget.amount)}</TableCell>
+                    <TableCell className={cn(isOverBudget && "text-destructive")}>{currencyFormatter(budget.spent)}</TableCell>
+                    <TableCell className={cn(budget.remaining < 0 && "text-destructive")}>{currencyFormatter(budget.remaining)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                         <Progress value={Math.min(progressValue,100)} className={cn("w-[100px] h-3", isOverBudget ? "[&>div]:bg-destructive" : "")} />
+                         <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DialogTrigger asChild>
+                            <DropdownMenuItem onClick={() => setSelectedBudget(budget)}>
+                              <Edit2 className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          </DialogTrigger>
+                          <DropdownMenuItem 
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                            onClick={() => {
+                              setSelectedBudget(budget);
+                              setIsDeleteAlertOpen(true);
+                            }}
+                          >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
-                        </AlertDialogTrigger>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       
-      {/* Edit Dialog Content */}
-      {selectedBudget && (
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Budget</DialogTitle>
-          </DialogHeader>
-          <BudgetForm
-            budget={selectedBudget}
-            onFormSubmit={() => {
-              setIsEditDialogOpen(false);
-              setSelectedBudget(null);
-            }}
-            setOpen={setIsEditDialogOpen}
-          />
-        </DialogContent>
-      )}
+        {/* Edit Dialog Content */}
+        {selectedBudget && isEditDialogOpen && (
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Budget</DialogTitle>
+            </DialogHeader>
+            <BudgetForm
+              budget={selectedBudget}
+              onFormSubmit={() => {
+                setIsEditDialogOpen(false);
+                // setSelectedBudget(null); // Handled by onOpenChange
+              }}
+              setOpen={setIsEditDialogOpen}
+            />
+          </DialogContent>
+        )}
+      </Dialog>
 
       {/* Delete Alert Dialog */}
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the budget for
-            "{selectedBudget?.category}".
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setSelectedBudget(null)}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => {
-              if (selectedBudget) deleteBudget(selectedBudget.id);
+      <AlertDialog 
+        open={isDeleteAlertOpen} 
+        onOpenChange={(open) => {
+          setIsDeleteAlertOpen(open);
+          if (!open) {
+            setSelectedBudget(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the budget for
+              "{selectedBudget?.category}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              // setIsDeleteAlertOpen(false); // Handled by onOpenChange
               setSelectedBudget(null);
-            }}
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </Dialog>
+            }}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedBudget) deleteBudget(selectedBudget.id);
+                // setIsDeleteAlertOpen(false); // Handled by onOpenChange
+                setSelectedBudget(null);
+              }}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
