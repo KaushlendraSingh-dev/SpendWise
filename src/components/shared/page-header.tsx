@@ -32,7 +32,7 @@ export function PageHeader({ title, description, actions, icon: Icon, imageUrl, 
           src={imageUrl || `https://placehold.co/300x200.png`}
           alt={imageUrl ? `${title} icon` : `${title} header image`}
           fill
-          className="object-cover"
+          className="object-contain" 
           data-ai-hint={imageHint || (imageUrl ? "icon" : "abstract background")}
           priority={true} // Good for LCP if this is a prominent header
         />
