@@ -64,7 +64,8 @@ export function BudgetList() {
         }}
       >
         <ScrollArea className={cn(
-          "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm"
+          "h-[450px] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
+          "transition-all duration-300 ease-in-out" // Removed hover effects from container
           )}>
           <Table>
             <TableHeader>
@@ -84,7 +85,10 @@ export function BudgetList() {
                 return (
                   <TableRow 
                     key={budget.id}
-                    className="relative hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10 transition-all duration-150 ease-in-out"
+                    className={cn(
+                      "relative transition-all duration-150 ease-in-out",
+                      "hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10"
+                    )}
                   >
                     <TableCell className="font-medium">{budget.category}</TableCell>
                     <TableCell>{currencyFormatter(budget.amount)}</TableCell>

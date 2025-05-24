@@ -62,7 +62,8 @@ export function ExpenseList() {
         }}
       >
         <ScrollArea className={cn(
-            "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm"
+            "h-[450px] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
+            "transition-all duration-300 ease-in-out" // Removed hover effects from container
           )}>
           <Table>
             <TableHeader>
@@ -78,7 +79,10 @@ export function ExpenseList() {
               {sortedExpenses.map((expense) => (
                 <TableRow 
                   key={expense.id} 
-                  className="relative hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10 transition-all duration-150 ease-in-out"
+                  className={cn(
+                    "relative transition-all duration-150 ease-in-out",
+                    "hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10"
+                  )}
                 >
                   <TableCell>{format(new Date(expense.date), "MMM d, yyyy")}</TableCell>
                   <TableCell className="font-medium max-w-[200px] truncate" title={expense.description}>{expense.description}</TableCell>
@@ -128,7 +132,6 @@ export function ExpenseList() {
               expense={selectedExpense}
               onFormSubmit={() => {
                 setIsEditDialogOpen(false);
-                // setSelectedExpense(null); // Handled by onOpenChange
               }}
               setOpen={setIsEditDialogOpen}
             />
@@ -156,13 +159,11 @@ export function ExpenseList() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
-              // setIsDeleteAlertOpen(false); // Handled by onOpenChange
               setSelectedExpense(null);
             }}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (selectedExpense) deleteExpense(selectedExpense.id);
-                // setIsDeleteAlertOpen(false); // Handled by onOpenChange
                 setSelectedExpense(null);
               }}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
