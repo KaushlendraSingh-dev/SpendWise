@@ -1,5 +1,7 @@
+
 "use client";
 
+import React from 'react'; // Added React import for useCallback
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Expense, Budget, Category, DataStore } from '@/lib/types';
@@ -80,38 +82,39 @@ export const useDataStore = create<AppState>()(
 export const useCalculatedData = () => {
   const { expenses, budgets } = useDataStore();
 
-  const getTotalSpending = (period?: 'month' | 'year') => {
+  const getTotalSpending = React.useCallback((period?: 'month' | 'year') => {
     // Simple total for now, can be enhanced with period filtering
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
-  };
+  }, [expenses]);
 
-  const getSpendingByCategory = () => {
+  const getSpendingByCategory = React.useCallback(() => {
     const spending: Record<Category, number> = {};
     expenses.forEach(exp => {
       spending[exp.category] = (spending[exp.category] || 0) + exp.amount;
     });
     return spending;
-  };
+  }, [expenses]);
   
-  const getExpensesByCategory = (category: Category) => {
+  const getExpensesByCategory = React.useCallback((category: Category) => {
     return expenses.filter(exp => exp.category === category);
-  };
+  }, [expenses]);
 
-  const getBudgetProgress = () : Budget[] => {
-    const spendingByCategory = getSpendingByCategory();
-    return budgets.map(budget => {
-      const spent = spendingByCategory[budget.category] || 0;
-      const remaining = budget.amount - spent;
-      return { ...budget, spent, remaining };
-    });
-  };
-  
-  const getAllCategories = () => {
+  const getAllCategories = React.useCallback(() => {
     const categoriesFromExpenses = expenses.map(e => e.category);
     const categoriesFromBudgets = budgets.map(b => b.category);
     const allUniqueCategories = Array.from(new Set([...siteConfig.defaultCategories, ...categoriesFromExpenses, ...categoriesFromBudgets]));
     return allUniqueCategories.sort();
-  }
+  }, [expenses, budgets]);
+
+  const getBudgetProgress = React.useCallback(() : Budget[] => {
+    const spendingByCategoryData = getSpendingByCategory(); // Uses the memoized version
+    return budgets.map(budget => {
+      const spent = spendingByCategoryData[budget.category] || 0;
+      const remaining = budget.amount - spent;
+      return { ...budget, spent, remaining };
+    });
+  }, [budgets, getSpendingByCategory]);
+
 
   return { 
     expenses, 
