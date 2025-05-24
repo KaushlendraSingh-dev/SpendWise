@@ -14,13 +14,13 @@ export default function CalculatorPage() {
         title="Calculator"
         description="Perform simple calculations."
         icon={CalculatorIcon}
-        imageUrl="https://placehold.co/300x200.png"
-        imageHint="calculator abstract"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/16853/16853125.png"
+        imageHint="calculator math"
       />
       <div className="mt-6 flex justify-center">
         <Card className={cn(
           "w-full max-w-md shadow-xl transition-all duration-300 ease-in-out",
-          "hover:scale-105 hover:shadow-2xl hover:border-accent" // Added shadow-2xl for more pop
+          "hover:scale-105 hover:shadow-2xl hover:border-accent"
         )}>
           <CardHeader>
             <CardTitle className="text-center">Simple Calculator</CardTitle>

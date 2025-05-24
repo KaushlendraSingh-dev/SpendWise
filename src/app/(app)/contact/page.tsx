@@ -13,7 +13,7 @@ export default function ContactPage() {
         title="Contact Us"
         description="Get in touch with the developer."
         icon={Mail}
-        imageUrl="https://placehold.co/300x200.png"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/9194/9194840.png"
         imageHint="contact mail"
       />
       <div className="mt-6">

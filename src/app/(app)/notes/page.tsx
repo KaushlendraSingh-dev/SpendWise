@@ -13,8 +13,8 @@ export default function NotesPage() {
         title="Notes"
         description="Jot down your thoughts and reminders."
         icon={NotebookPen}
-        imageUrl="https://placehold.co/300x200.png"
-        imageHint="notes abstract"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/3075/3075908.png"
+        imageHint="pencil note"
       />
       <div className="mt-6">
         <Card className={cn(

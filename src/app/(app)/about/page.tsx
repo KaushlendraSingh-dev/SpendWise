@@ -13,8 +13,8 @@ export default function AboutPage() {
         title="About Us"
         description="Learn more about SpendWise and its developer."
         icon={Info}
-        imageUrl="https://placehold.co/300x200.png"
-        imageHint="profile person"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/3566/3566020.png"
+        imageHint="book info"
       />
       <div className="mt-6 grid gap-6 md:grid-cols-1">
         <Card className={cn(
