@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -67,6 +68,9 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
         date: new Date(expense.date),
       }
     : {
+        description: "",
+        amount: "" as any, // Initialize with empty string
+        category: "",
         date: new Date(),
       };
 
@@ -88,7 +92,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
     } else {
       addExpense(expenseData);
       toast({ title: "Expense Added", description: "New expense logged successfully." });
-      form.reset({description: "", amount: undefined, category: "", date: new Date() }); // Reset form to defaults
+      form.reset({description: "", amount: "" as any, category: "", date: new Date() }); // Reset with empty string
     }
     onFormSubmit?.();
     setOpen?.(false);

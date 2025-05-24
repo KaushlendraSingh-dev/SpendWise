@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,7 +53,10 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
         category: budget.category,
         amount: budget.amount,
       }
-    : {};
+    : {
+        category: "",
+        amount: "" as any, // Initialize with empty string
+      };
   
   useEffect(() => {
     // Filter out categories that already have a budget, unless we are editing that specific budget
@@ -81,7 +85,7 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
       }
       addBudget(data);
       toast({ title: "Budget Set", description: `Budget for ${data.category} set successfully.` });
-      form.reset({ category: "", amount: undefined });
+      form.reset({ category: "", amount: "" as any }); // Reset with empty string
     }
     onFormSubmit?.();
     setOpen?.(false);
