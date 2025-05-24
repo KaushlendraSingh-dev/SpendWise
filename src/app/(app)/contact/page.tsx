@@ -3,7 +3,8 @@
 
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react"; // Added Phone icon
+import { cn } from "@/lib/utils";
 
 export default function ContactPage() {
   return (
@@ -16,7 +17,10 @@ export default function ContactPage() {
         imageHint="contact mail"
       />
       <div className="mt-6">
-        <Card className="shadow-lg hover:border-accent transition-colors duration-300 ease-in-out">
+        <Card className={cn(
+          "shadow-lg transition-all duration-300 ease-in-out",
+          "hover:scale-105 hover:shadow-xl hover:border-accent"
+        )}>
           <CardHeader>
             <CardTitle>Developer Information</CardTitle>
             <CardDescription>Details for Kaushlendra Singh.</CardDescription>
@@ -31,6 +35,17 @@ export default function ContactPage() {
               <p className="text-muted-foreground ml-7">Shivrampally</p>
               <p className="text-muted-foreground ml-7">Hyderabad, Telangana</p>
               <p className="text-muted-foreground ml-7">India</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground flex items-center">
+                <Phone className="mr-2 h-5 w-5 text-primary" />
+                Phone
+              </h3>
+              <p className="text-muted-foreground ml-7">
+                <a href="tel:+918279930098" className="hover:text-primary hover:underline">
+                  +91 8279930098
+                </a>
+              </p>
             </div>
              <div>
               <h3 className="text-lg font-semibold text-foreground flex items-center">

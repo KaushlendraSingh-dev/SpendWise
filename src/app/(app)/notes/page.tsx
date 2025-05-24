@@ -4,6 +4,7 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { NotebookPen } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function NotesPage() {
   return (
@@ -16,7 +17,10 @@ export default function NotesPage() {
         imageHint="notes abstract"
       />
       <div className="mt-6">
-        <Card className="shadow-lg">
+        <Card className={cn(
+          "shadow-lg transition-all duration-300 ease-in-out",
+          "hover:scale-105 hover:shadow-xl hover:border-accent"
+        )}>
           <CardHeader>
             <CardTitle>Notes Area</CardTitle>
             <CardDescription>This feature is currently under development. Check back soon!</CardDescription>

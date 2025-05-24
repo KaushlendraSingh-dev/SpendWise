@@ -4,6 +4,7 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AboutPage() {
   return (
@@ -16,7 +17,10 @@ export default function AboutPage() {
         imageHint="profile person"
       />
       <div className="mt-6 grid gap-6 md:grid-cols-1">
-        <Card className="shadow-lg hover:border-accent transition-colors duration-300 ease-in-out">
+        <Card className={cn(
+          "shadow-lg transition-all duration-300 ease-in-out",
+          "hover:scale-105 hover:shadow-xl hover:border-accent"
+        )}>
           <CardHeader>
             <CardTitle>About SpendWise</CardTitle>
             <CardDescription>
@@ -32,7 +36,10 @@ export default function AboutPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg hover:border-accent transition-colors duration-300 ease-in-out">
+        <Card className={cn(
+          "shadow-lg transition-all duration-300 ease-in-out",
+          "hover:scale-105 hover:shadow-xl hover:border-accent"
+        )}>
           <CardHeader>
             <CardTitle>The Developer</CardTitle>
           </CardHeader>
