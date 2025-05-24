@@ -1,5 +1,6 @@
+
 import type { NavItem } from '@/lib/types';
-import { LayoutDashboard, CreditCard, Target, Settings, Calculator as CalculatorIcon, NotebookPen } from 'lucide-react';
+import { LayoutDashboard, CreditCard, Target, Settings, Calculator as CalculatorIcon, NotebookPen, Info, Mail } from 'lucide-react';
 
 export const siteConfig = {
   name: "SpendWise",
@@ -29,6 +30,16 @@ export const siteConfig = {
       title: "Notes",
       href: "/notes",
       icon: NotebookPen,
+    },
+    {
+      title: "About Us",
+      href: "/about",
+      icon: Info,
+    },
+    {
+      title: "Contact Us",
+      href: "/contact",
+      icon: Mail,
     }
     // Example for future settings page
     // {

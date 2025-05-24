@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -8,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from '@/components/ui/sidebar'; // Assuming Sidebar components are structured like this
+} from '@/components/ui/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function SidebarNav() {
@@ -25,8 +26,8 @@ export function SidebarNav() {
                   variant="ghost"
                   className={cn(
                     'w-full justify-start',
-                    pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard")
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground font-semibold'
+                    pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard" && item.href.length > 1 && pathname.startsWith(item.href + '/'))
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground font-semibold'
                       : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   )}
                   tooltip={item.title}
