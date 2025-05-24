@@ -15,7 +15,7 @@ export function BudgetProgressList() {
 
   if (budgets.length === 0) {
     return (
-      <Card className="shadow-lg">
+      <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
         <CardHeader>
           <CardTitle className="flex items-center">
             <ClipboardList className="mr-2 h-5 w-5 text-muted-foreground" />
@@ -33,7 +33,7 @@ export function BudgetProgressList() {
   const currencyFormatter = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
   return (
-    <Card className="shadow-lg">
+    <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
       <CardHeader>
         <CardTitle className="flex items-center">
           <ClipboardList className="mr-2 h-5 w-5 text-muted-foreground" />

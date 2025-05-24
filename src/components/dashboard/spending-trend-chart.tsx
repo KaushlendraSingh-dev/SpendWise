@@ -22,6 +22,7 @@ import {
 import { useCalculatedData } from "@/hooks/use-data-store";
 import { useMemo } from "react";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export function SpendingTrendChart() {
   const { getSpendingOverTime } = useCalculatedData();
@@ -49,7 +50,7 @@ export function SpendingTrendChart() {
 
   if (chartData.length === 0) {
     return (
-      <Card className="shadow-lg">
+      <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
         <CardHeader>
           <CardTitle className="flex items-center">
             <Activity className="mr-2 h-5 w-5 text-muted-foreground" />
@@ -69,7 +70,7 @@ export function SpendingTrendChart() {
   }
 
   return (
-    <Card className="shadow-lg">
+    <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
       <CardHeader>
         <CardTitle className="flex items-center">
           <LineChartIcon className="mr-2 h-5 w-5 text-muted-foreground" />

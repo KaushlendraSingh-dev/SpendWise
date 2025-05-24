@@ -15,7 +15,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions, icon: Icon, imageUrl, imageHint }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4 overflow-hidden rounded-lg border bg-card shadow-lg sm:flex-row">
+    <div className={cn("mb-6 flex flex-col gap-4 overflow-hidden rounded-lg border bg-card shadow-lg sm:flex-row hover:border-accent transition-colors duration-300 ease-in-out")}>
       <div className="flex-1 p-6">
         <div className="flex items-center gap-3">
           {Icon && <Icon className="h-8 w-8 text-primary" />}

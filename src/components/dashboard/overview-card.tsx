@@ -1,5 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface OverviewCardProps {
   title: string;
@@ -11,7 +12,7 @@ interface OverviewCardProps {
 
 export function OverviewCard({ title, value, description, icon: Icon, className }: OverviewCardProps) {
   return (
-    <Card className={cn("shadow-lg hover:shadow-xl transition-shadow duration-300", className)}>
+    <Card className={cn("shadow-lg hover:shadow-xl hover:scale-105 hover:border-accent transition-all duration-300 ease-in-out", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
@@ -24,4 +25,3 @@ export function OverviewCard({ title, value, description, icon: Icon, className 
   );
 }
 
-import { cn } from "@/lib/utils"; // Ensure cn is imported if not globally available

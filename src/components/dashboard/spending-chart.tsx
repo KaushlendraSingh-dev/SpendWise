@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useCalculatedData } from "@/hooks/use-data-store";
 import { useMemo } from "react";
 import { PieChart } from "lucide-react"; // Added icon import
+import { cn } from "@/lib/utils";
 
 export function SpendingChart() {
   const { getSpendingByCategory } = useCalculatedData();
@@ -19,7 +20,7 @@ export function SpendingChart() {
 
   if (chartData.length === 0) {
     return (
-      <Card className="shadow-lg">
+      <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
         <CardHeader>
           <CardTitle className="flex items-center">
             <PieChart className="mr-2 h-5 w-5 text-muted-foreground" />
@@ -37,7 +38,7 @@ export function SpendingChart() {
   const currencyFormatter = (value: number) => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
-    <Card className="shadow-lg">
+    <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
       <CardHeader>
         <CardTitle className="flex items-center">
           <PieChart className="mr-2 h-5 w-5 text-muted-foreground" />
