@@ -62,8 +62,9 @@ export function ExpenseList() {
         }}
       >
         <ScrollArea className={cn(
-            "h-[450px] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
-            "transition-all duration-300 ease-in-out" // Removed hover effects from container
+            "h-auto max-h-[300px] sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]", // Responsive max-heights
+            "border rounded-md shadow-sm",
+            "transition-all duration-300 ease-in-out"
           )}>
           <Table>
             <TableHeader>
@@ -85,7 +86,7 @@ export function ExpenseList() {
                   )}
                 >
                   <TableCell>{format(new Date(expense.date), "MMM d, yyyy")}</TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate" title={expense.description}>{expense.description}</TableCell>
+                  <TableCell className="font-medium max-w-[150px] sm:max-w-[200px] truncate" title={expense.description}>{expense.description}</TableCell>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell className="text-right">{currencyFormatter(expense.amount)}</TableCell>
                   <TableCell className="text-right">
