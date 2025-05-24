@@ -1,9 +1,11 @@
+
 'use client';
 
 import { PageHeader } from '@/components/shared/page-header';
 import { OverviewCard } from '@/components/dashboard/overview-card';
 import { SpendingChart } from '@/components/dashboard/spending-chart';
 import { BudgetProgressList } from '@/components/dashboard/budget-progress-list';
+import { SpendingTrendChart } from '@/components/dashboard/spending-trend-chart'; // New import
 import { DollarSign, ListChecks, TrendingUp } from 'lucide-react';
 import { useCalculatedData } from '@/hooks/use-data-store';
 import { useMemo } from 'react';
@@ -50,9 +52,12 @@ export default function DashboardPage() {
           icon={ListChecks}
         />
       </div>
-      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 mb-6">
         <SpendingChart />
         <BudgetProgressList />
+      </div>
+      <div className="grid gap-6 md:grid-cols-1">
+        <SpendingTrendChart />
       </div>
     </>
   );

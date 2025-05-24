@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -5,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { useCalculatedData } from "@/hooks/use-data-store";
 import type { Budget } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ClipboardList } from "lucide-react"; // Added icon import
+import { cn } from "@/lib/utils";
 
 export function BudgetProgressList() {
   const { getBudgetProgress } = useCalculatedData();
@@ -14,7 +17,10 @@ export function BudgetProgressList() {
     return (
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Budget Progress</CardTitle>
+          <CardTitle className="flex items-center">
+            <ClipboardList className="mr-2 h-5 w-5 text-muted-foreground" />
+            Budget Progress
+          </CardTitle>
           <CardDescription>Track how you're doing against your budget goals.</CardDescription>
         </CardHeader>
         <CardContent className="h-[350px] flex items-center justify-center">
@@ -29,11 +35,14 @@ export function BudgetProgressList() {
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>Budget Progress</CardTitle>
+        <CardTitle className="flex items-center">
+          <ClipboardList className="mr-2 h-5 w-5 text-muted-foreground" />
+          Budget Progress
+        </CardTitle>
         <CardDescription>Track how you're doing against your budget goals.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[300px] pr-3"> {/* Adjust height as needed */}
+        <ScrollArea className="h-[300px] pr-3">
           <div className="space-y-6">
             {budgets.map((budget: Budget) => {
               const progressValue = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
@@ -46,7 +55,10 @@ export function BudgetProgressList() {
                       {currencyFormatter(budget.spent)} / {currencyFormatter(budget.amount)}
                     </span>
                   </div>
-                  <Progress value={Math.min(progressValue, 100)} className={cn(isOverBudget ? "[&>div]:bg-destructive" : "")} />
+                  <div className="flex items-center gap-2">
+                    <Progress value={Math.min(progressValue, 100)} className={cn("flex-1 h-3", isOverBudget ? "[&>div]:bg-destructive" : "")} />
+                    <span className="text-xs font-medium text-muted-foreground w-12 text-right">{Math.round(progressValue)}%</span>
+                  </div>
                   <p className="text-xs text-muted-foreground text-right">
                     {isOverBudget 
                       ? `${currencyFormatter(budget.spent - budget.amount)} over budget`
@@ -61,5 +73,3 @@ export function BudgetProgressList() {
     </Card>
   );
 }
-
-import { cn } from "@/lib/utils";

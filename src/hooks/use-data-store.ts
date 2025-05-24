@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Expense, Budget, Category, DataStore } from '@/lib/types';
 import { siteConfig } from '@/config/site';
+import { format } from 'date-fns'; // Added for date formatting
 
 const initialExpenses: Expense[] = [
   { id: '1', description: 'Groceries', amount: 75.50, category: 'Food & Drinks', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
@@ -106,7 +107,7 @@ export const useCalculatedData = () => {
     return allUniqueCategories.sort();
   }, [expenses, budgets]);
 
-  const getBudgetProgress = React.useCallback(() : Budget[] => {
+  const getBudgetProgress = React.useCallback((): Budget[] => {
     const spendingByCategoryData = getSpendingByCategory(); // Uses the memoized version
     return budgets.map(budget => {
       const spent = spendingByCategoryData[budget.category] || 0;
@@ -114,6 +115,30 @@ export const useCalculatedData = () => {
       return { ...budget, spent, remaining };
     });
   }, [budgets, getSpendingByCategory]);
+
+  const getSpendingOverTime = React.useCallback(() => {
+    if (expenses.length === 0) return [];
+
+    const spendingByDate: Record<string, number> = {};
+    expenses.forEach(exp => {
+      // Ensure date is valid before formatting
+      try {
+        const dateObj = new Date(exp.date);
+        if (isNaN(dateObj.getTime())) {
+          console.warn(`Invalid date found for expense ID ${exp.id}: ${exp.date}`);
+          return; 
+        }
+        const dateKey = format(dateObj, 'yyyy-MM-dd');
+        spendingByDate[dateKey] = (spendingByDate[dateKey] || 0) + exp.amount;
+      } catch (e) {
+        console.warn(`Error processing date for expense ID ${exp.id}: ${exp.date}`, e);
+      }
+    });
+    
+    return Object.entries(spendingByDate)
+      .map(([date, total]) => ({ date, total }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [expenses]);
 
 
   return { 
@@ -123,6 +148,7 @@ export const useCalculatedData = () => {
     getSpendingByCategory, 
     getBudgetProgress, 
     getExpensesByCategory,
-    getAllCategories
+    getAllCategories,
+    getSpendingOverTime, // Export new function
   };
 };

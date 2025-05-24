@@ -1,9 +1,11 @@
+
 "use client"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useCalculatedData } from "@/hooks/use-data-store";
 import { useMemo } from "react";
+import { PieChart } from "lucide-react"; // Added icon import
 
 export function SpendingChart() {
   const { getSpendingByCategory } = useCalculatedData();
@@ -19,7 +21,10 @@ export function SpendingChart() {
     return (
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Spending by Category</CardTitle>
+          <CardTitle className="flex items-center">
+            <PieChart className="mr-2 h-5 w-5 text-muted-foreground" />
+            Spending by Category
+          </CardTitle>
           <CardDescription>Your spending breakdown will appear here.</CardDescription>
         </CardHeader>
         <CardContent className="h-[350px] flex items-center justify-center">
@@ -29,12 +34,15 @@ export function SpendingChart() {
     );
   }
   
-  const currencyFormatter = (value: number) => `$${value.toFixed(2)}`;
+  const currencyFormatter = (value: number) => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>Spending by Category</CardTitle>
+        <CardTitle className="flex items-center">
+          <PieChart className="mr-2 h-5 w-5 text-muted-foreground" />
+          Spending by Category
+        </CardTitle>
         <CardDescription>Visualizing your expenses across different categories.</CardDescription>
       </CardHeader>
       <CardContent className="h-[350px] p-2">
@@ -46,10 +54,10 @@ export function SpendingChart() {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              interval={0} // Show all labels if possible
-              angle={-30} // Angle labels for better fit
+              interval={0} 
+              angle={-30} 
               textAnchor="end"
-              height={60} // Increase height to accommodate angled labels
+              height={60} 
             />
             <YAxis
               stroke="hsl(var(--muted-foreground))"
@@ -57,7 +65,7 @@ export function SpendingChart() {
               tickLine={false}
               axisLine={false}
               tickFormatter={currencyFormatter}
-              width={70}
+              width={80} // Increased width for currency labels
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent) / 0.2)' }}
