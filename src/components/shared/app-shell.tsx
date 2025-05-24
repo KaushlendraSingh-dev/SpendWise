@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { siteConfig } from '@/config/site';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, DollarSign } from 'lucide-react'; 
+import { Menu, Sparkles } from 'lucide-react'; 
 import { SidebarNav } from './sidebar-nav';
 import { ScrollArea } from '../ui/scroll-area';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter } from '@/components/ui/sidebar'; 
@@ -22,7 +22,7 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar className="border-r bg-sidebar text-sidebar-foreground">
           <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary hover:text-sidebar-primary/90">
-              <DollarSign className="h-7 w-7" />
+              <Sparkles className="h-7 w-7" />
               <span className="text-lg">{siteConfig.name}</span>
             </Link>
           </SidebarHeader>
@@ -47,7 +47,7 @@ export function AppShell({ children }: AppShellProps) {
               <SheetContent side="left" className="flex flex-col p-0 w-[280px] sm:max-w-[280px] bg-sidebar text-sidebar-foreground border-sidebar-border">
                 <div className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
                   <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary hover:text-sidebar-primary/90">
-                    <DollarSign className="h-7 w-7" />
+                    <Sparkles className="h-7 w-7" />
                     <span className="text-lg">{siteConfig.name}</span>
                   </Link>
                 </div>
