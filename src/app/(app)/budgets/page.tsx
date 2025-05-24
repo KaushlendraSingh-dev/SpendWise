@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,7 @@ import { BudgetForm } from "@/components/budgets/budget-form";
 import { BudgetList } from "@/components/budgets/budget-list";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Target } from "lucide-react";
 
 export default function BudgetsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -16,6 +17,8 @@ export default function BudgetsPage() {
       <PageHeader
         title="Budgets"
         description="Set and track your monthly spending goals for various categories."
+        icon={Target}
+        imageHint="piggybank savings"
         actions={
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>

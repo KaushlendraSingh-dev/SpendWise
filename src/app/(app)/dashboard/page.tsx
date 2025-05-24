@@ -5,8 +5,8 @@ import { PageHeader } from '@/components/shared/page-header';
 import { OverviewCard } from '@/components/dashboard/overview-card';
 import { SpendingChart } from '@/components/dashboard/spending-chart';
 import { BudgetProgressList } from '@/components/dashboard/budget-progress-list';
-import { SpendingTrendChart } from '@/components/dashboard/spending-trend-chart'; // New import
-import { DollarSign, ListChecks, TrendingUp } from 'lucide-react';
+import { SpendingTrendChart } from '@/components/dashboard/spending-trend-chart';
+import { DollarSign, ListChecks, TrendingUp, LayoutDashboard } from 'lucide-react';
 import { useCalculatedData } from '@/hooks/use-data-store';
 import { useMemo } from 'react';
 
@@ -31,6 +31,8 @@ export default function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="Your financial overview at a glance."
+        icon={LayoutDashboard}
+        imageHint="finance abstract"
       />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
         <OverviewCard
