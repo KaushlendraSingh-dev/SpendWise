@@ -65,7 +65,7 @@ export function BudgetList() {
       >
         <ScrollArea className={cn(
           "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
-          "hover:border-accent transition-colors duration-300 ease-in-out"
+          "hover:shadow-xl hover:scale-105 hover:border-accent transition-all duration-300 ease-in-out"
           )}>
           <Table>
             <TableHeader>
