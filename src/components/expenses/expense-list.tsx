@@ -62,8 +62,7 @@ export function ExpenseList() {
         }}
       >
         <ScrollArea className={cn(
-            "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
-            "hover:shadow-xl hover:scale-105 hover:border-accent transition-all duration-300 ease-in-out"
+            "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm"
           )}>
           <Table>
             <TableHeader>
@@ -77,7 +76,10 @@ export function ExpenseList() {
             </TableHeader>
             <TableBody>
               {sortedExpenses.map((expense) => (
-                <TableRow key={expense.id}>
+                <TableRow 
+                  key={expense.id} 
+                  className="relative hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10 transition-all duration-150 ease-in-out"
+                >
                   <TableCell>{format(new Date(expense.date), "MMM d, yyyy")}</TableCell>
                   <TableCell className="font-medium max-w-[200px] truncate" title={expense.description}>{expense.description}</TableCell>
                   <TableCell>{expense.category}</TableCell>
