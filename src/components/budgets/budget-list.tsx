@@ -93,9 +93,11 @@ export function BudgetList() {
                               "w-[100px] h-3",
                               isOverBudget
                                 ? "[&>div]:bg-destructive"
+                                : progressValue >= 70
+                                ? "[&>div]:bg-orange-500" // Orange for 70-99% (and 100%)
                                 : progressValue > 50
-                                ? "[&>div]:bg-yellow-400"
-                                : ""
+                                ? "[&>div]:bg-yellow-400" // Yellow for 51-69%
+                                : "" // Default primary for 0-50%
                             )}
                           />
                          <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>

@@ -32,7 +32,8 @@ export default function DashboardPage() {
         title="Dashboard"
         description="Your financial overview at a glance."
         icon={LayoutDashboard}
-        imageHint="finance abstract"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/8899/8899687.png"
+        imageHint="dashboard icon"
       />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
         <OverviewCard

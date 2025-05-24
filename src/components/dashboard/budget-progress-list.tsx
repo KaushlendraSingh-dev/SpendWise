@@ -62,9 +62,11 @@ export function BudgetProgressList() {
                         "flex-1 h-3", 
                         isOverBudget 
                           ? "[&>div]:bg-destructive" 
+                          : progressValue >= 70
+                          ? "[&>div]:bg-orange-500" // Orange for 70-99% (and 100%)
                           : progressValue > 50 
-                          ? "[&>div]:bg-yellow-400" 
-                          : ""
+                          ? "[&>div]:bg-yellow-400" // Yellow for 51-69%
+                          : "" // Default primary for 0-50%
                       )} 
                     />
                     <span className="text-xs font-medium text-muted-foreground w-12 text-right">{Math.round(progressValue)}%</span>

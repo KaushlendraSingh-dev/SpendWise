@@ -9,10 +9,11 @@ interface PageHeaderProps {
   description?: string;
   actions?: ReactNode;
   icon?: LucideIcon;
+  imageUrl?: string; // Added for custom image URL
   imageHint?: string; // For data-ai-hint
 }
 
-export function PageHeader({ title, description, actions, icon: Icon, imageHint }: PageHeaderProps) {
+export function PageHeader({ title, description, actions, icon: Icon, imageUrl, imageHint }: PageHeaderProps) {
   return (
     <div className="mb-6 flex flex-col gap-4 overflow-hidden rounded-lg border bg-card shadow-lg sm:flex-row">
       <div className="flex-1 p-6">
@@ -28,11 +29,11 @@ export function PageHeader({ title, description, actions, icon: Icon, imageHint 
       </div>
       <div className="relative hidden sm:block sm:w-1/3 md:w-1/4 lg:w-1/5">
         <Image
-          src={`https://placehold.co/300x200.png`}
-          alt={`${title} header image`}
+          src={imageUrl || `https://placehold.co/300x200.png`}
+          alt={imageUrl ? `${title} icon` : `${title} header image`}
           fill
           className="object-cover"
-          data-ai-hint={imageHint || "abstract background"}
+          data-ai-hint={imageHint || (imageUrl ? "icon" : "abstract background")}
           priority={true} // Good for LCP if this is a prominent header
         />
       </div>
