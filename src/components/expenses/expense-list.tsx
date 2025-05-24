@@ -34,6 +34,7 @@ import { ExpenseForm } from "./expense-form";
 import { useDataStore } from "@/hooks/use-data-store";
 import type { Expense } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 export function ExpenseList() {
   const { expenses, deleteExpense } = useDataStore();
@@ -60,7 +61,10 @@ export function ExpenseList() {
           }
         }}
       >
-        <ScrollArea className="h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm">
+        <ScrollArea className={cn(
+            "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
+            "hover:border-accent transition-colors duration-300 ease-in-out"
+          )}>
           <Table>
             <TableHeader>
               <TableRow>

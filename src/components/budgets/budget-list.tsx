@@ -63,7 +63,10 @@ export function BudgetList() {
           }
         }}
       >
-        <ScrollArea className="h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm">
+        <ScrollArea className={cn(
+          "h-[calc(100vh-20rem)] sm:h-auto sm:max-h-[600px] border rounded-md shadow-sm",
+          "hover:border-accent transition-colors duration-300 ease-in-out"
+          )}>
           <Table>
             <TableHeader>
               <TableRow>
@@ -94,10 +97,10 @@ export function BudgetList() {
                               isOverBudget
                                 ? "[&>div]:bg-destructive"
                                 : progressValue >= 70
-                                ? "[&>div]:bg-orange-500" // Orange for 70-99% (and 100%)
-                                : progressValue > 50
-                                ? "[&>div]:bg-yellow-400" // Yellow for 51-69%
-                                : "" // Default primary for 0-50%
+                                ? "[&>div]:bg-orange-500" 
+                                : progressValue > 50 
+                                ? "[&>div]:bg-yellow-400" 
+                                : "" 
                             )}
                           />
                          <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>
