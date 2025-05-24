@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { siteConfig } from '@/config/site';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, ShieldCheck, DollarSign } from 'lucide-react'; // Changed icon
+import { Menu, DollarSign } from 'lucide-react'; 
 import { SidebarNav } from './sidebar-nav';
 import { ScrollArea } from '../ui/scroll-area';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter } from '@/components/ui/sidebar'; 
+import { CurrentTime } from './current-time';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -21,17 +22,13 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar className="border-r bg-sidebar text-sidebar-foreground">
           <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary hover:text-sidebar-primary/90">
-              <DollarSign className="h-7 w-7" /> {/* Changed icon */}
+              <DollarSign className="h-7 w-7" />
               <span className="text-lg">{siteConfig.name}</span>
             </Link>
           </SidebarHeader>
           <SidebarContent className="px-2 py-4 lg:px-4">
             <SidebarNav />
           </SidebarContent>
-          {/* Optional SidebarFooter example */}
-          {/* <SidebarFooter className="p-4 text-xs text-sidebar-foreground/70">
-            © {new Date().getFullYear()} {siteConfig.name}
-          </SidebarFooter> */}
         </Sidebar>
         
         <div className="flex flex-col">
@@ -50,7 +47,7 @@ export function AppShell({ children }: AppShellProps) {
               <SheetContent side="left" className="flex flex-col p-0 w-[280px] sm:max-w-[280px] bg-sidebar text-sidebar-foreground border-sidebar-border">
                 <div className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
                   <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary hover:text-sidebar-primary/90">
-                    <DollarSign className="h-7 w-7" /> {/* Changed icon */}
+                    <DollarSign className="h-7 w-7" />
                     <span className="text-lg">{siteConfig.name}</span>
                   </Link>
                 </div>
@@ -62,6 +59,7 @@ export function AppShell({ children }: AppShellProps) {
             <div className="w-full flex-1">
               {/* Optional: Add search or other header elements here */}
             </div>
+            <CurrentTime /> 
             {/* Optional: Add user dropdown menu here */}
           </header>
           <main className="flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
