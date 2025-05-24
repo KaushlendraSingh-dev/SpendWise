@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { useCalculatedData } from "@/hooks/use-data-store";
 import type { Budget } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClipboardList } from "lucide-react"; // Added icon import
+import { ClipboardList } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 
 export function BudgetProgressList() {
@@ -56,7 +56,17 @@ export function BudgetProgressList() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Progress value={Math.min(progressValue, 100)} className={cn("flex-1 h-3", isOverBudget ? "[&>div]:bg-destructive" : "")} />
+                    <Progress 
+                      value={Math.min(progressValue, 100)} 
+                      className={cn(
+                        "flex-1 h-3", 
+                        isOverBudget 
+                          ? "[&>div]:bg-destructive" 
+                          : progressValue > 50 
+                          ? "[&>div]:bg-yellow-400" 
+                          : ""
+                      )} 
+                    />
                     <span className="text-xs font-medium text-muted-foreground w-12 text-right">{Math.round(progressValue)}%</span>
                   </div>
                   <p className="text-xs text-muted-foreground text-right">

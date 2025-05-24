@@ -54,8 +54,8 @@ export function BudgetList() {
 
   return (
     <>
-      <Dialog 
-        open={isEditDialogOpen} 
+      <Dialog
+        open={isEditDialogOpen}
         onOpenChange={(open) => {
           setIsEditDialogOpen(open);
           if (!open) {
@@ -87,7 +87,17 @@ export function BudgetList() {
                     <TableCell className={cn(budget.remaining < 0 && "text-destructive")}>{currencyFormatter(budget.remaining)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                         <Progress value={Math.min(progressValue,100)} className={cn("w-[100px] h-3", isOverBudget ? "[&>div]:bg-destructive" : "")} />
+                         <Progress
+                            value={Math.min(progressValue,100)}
+                            className={cn(
+                              "w-[100px] h-3",
+                              isOverBudget
+                                ? "[&>div]:bg-destructive"
+                                : progressValue > 50
+                                ? "[&>div]:bg-yellow-400"
+                                : ""
+                            )}
+                          />
                          <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>
                       </div>
                     </TableCell>
@@ -106,7 +116,7 @@ export function BudgetList() {
                               Edit
                             </DropdownMenuItem>
                           </DialogTrigger>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-destructive focus:text-destructive focus:bg-destructive/10"
                             onClick={() => {
                               setSelectedBudget(budget);
@@ -125,7 +135,7 @@ export function BudgetList() {
             </TableBody>
           </Table>
         </ScrollArea>
-      
+
         {/* Edit Dialog Content */}
         {selectedBudget && isEditDialogOpen && (
           <DialogContent className="sm:max-w-[425px]">
@@ -136,7 +146,6 @@ export function BudgetList() {
               budget={selectedBudget}
               onFormSubmit={() => {
                 setIsEditDialogOpen(false);
-                // setSelectedBudget(null); // Handled by onOpenChange
               }}
               setOpen={setIsEditDialogOpen}
             />
@@ -145,8 +154,8 @@ export function BudgetList() {
       </Dialog>
 
       {/* Delete Alert Dialog */}
-      <AlertDialog 
-        open={isDeleteAlertOpen} 
+      <AlertDialog
+        open={isDeleteAlertOpen}
         onOpenChange={(open) => {
           setIsDeleteAlertOpen(open);
           if (!open) {
@@ -164,13 +173,11 @@ export function BudgetList() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
-              // setIsDeleteAlertOpen(false); // Handled by onOpenChange
               setSelectedBudget(null);
             }}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (selectedBudget) deleteBudget(selectedBudget.id);
-                // setIsDeleteAlertOpen(false); // Handled by onOpenChange
                 setSelectedBudget(null);
               }}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
