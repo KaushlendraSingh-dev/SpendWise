@@ -3,7 +3,7 @@
 
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MapPin, Phone } from "lucide-react"; // Added Phone icon
+import { Mail, MapPin, Phone } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 
 export default function ContactPage() {
@@ -55,10 +55,6 @@ export default function ContactPage() {
               <p className="text-muted-foreground ml-7">
                 For any inquiries or feedback, please feel free to reach out.
               </p>
-              {/* You can add an email link or form here in the future */}
-              {/* <a href="mailto:kaushlendra.singh@example.com" className="text-primary hover:underline ml-7">
-                kaushlendra.singh@example.com
-              </a> */}
             </div>
           </CardContent>
         </Card>
