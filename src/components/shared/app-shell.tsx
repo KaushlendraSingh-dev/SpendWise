@@ -6,11 +6,11 @@ import { useRouter } from 'next/navigation';
 import { siteConfig } from '@/config/site';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger }from '@/components/ui/sheet';
-import { Menu, Sparkles, LogOut } from 'lucide-react'; 
+import { Menu, Sparkles, LogOut } from 'lucide-react';
 import { SidebarNav } from './sidebar-nav';
 import { ScrollArea } from '../ui/scroll-area';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, useSidebar, SidebarTrigger } from '@/components/ui/sidebar'; 
-import { CurrentTime } from './current-time';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, useSidebar, SidebarTrigger } from '@/components/ui/sidebar';
+// import { CurrentTime } from './current-time'; // Removed import
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import type { PropsWithChildren } from 'react';
@@ -71,7 +71,7 @@ function AppShellContent({ children }: AppShellProps) {
                 variant="outline"
                 size="icon"
                 className="shrink-0 md:hidden" // Only visible on mobile
-                onClick={toggleSidebar} 
+                onClick={toggleSidebar}
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle mobile navigation menu</span>
@@ -107,10 +107,10 @@ function AppShellContent({ children }: AppShellProps) {
           <div className="w-full flex-1">
             {/* Optional: Add search or other header elements here */}
           </div>
-          <CurrentTime /> 
+          {/* <CurrentTime />  Removed CurrentTime component */}
         </header>
         <main className="flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
-          <ScrollArea className="h-[calc(100vh-5rem)]"> 
+          <ScrollArea className="h-[calc(100vh-5rem)]">
              <div className="pr-4 pb-4">
                 {children}
              </div>
