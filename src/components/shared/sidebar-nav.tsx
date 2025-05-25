@@ -35,7 +35,7 @@ export function SidebarNav() {
                   className={cn(
                     'w-full justify-start',
                     pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard" && item.href.length > 1 && pathname.startsWith(item.href + '/'))
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90 hover:text-sidebar-primary-foreground font-semibold'
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground' // Removed font-semibold and hover for active
                       : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   )}
                   tooltip={item.title}

@@ -41,7 +41,7 @@ function AppShellContent({ children }: AppShellProps) {
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <Sidebar className="border-r bg-sidebar text-sidebar-foreground">
         <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary hover:text-sidebar-primary/90">
+          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
             <Sparkles className="h-7 w-7" />
             <span className="text-lg">{siteConfig.name}</span>
           </Link>
@@ -78,7 +78,7 @@ function AppShellContent({ children }: AppShellProps) {
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0 w-[280px] sm:max-w-[280px] bg-sidebar text-sidebar-foreground border-sidebar-border">
               <div className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
-                <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary hover:text-sidebar-primary/90">
+                <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
                   <Sparkles className="h-7 w-7" />
                   <span className="text-lg">{siteConfig.name}</span>
                 </Link>
