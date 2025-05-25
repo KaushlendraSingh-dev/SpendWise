@@ -1,6 +1,8 @@
+
 "use client";
 
 import * as React from "react";
+import { AuthProvider } from "@/context/auth-context";
 // import { ThemeProvider as NextThemesProvider } from "next-themes"; // If dark mode toggle is needed
 // import type { ThemeProviderProps } from "next-themes/dist/types";
 
@@ -13,8 +15,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   //     enableSystem
   //     disableTransitionOnChange
   //   >
-  //     {children}
+  //     <AuthProvider>{children}</AuthProvider>
   //   </NextThemesProvider>
   // );
-  return <>{children}</>; // Simple provider for now
+  return <AuthProvider>{children}</AuthProvider>; 
 }

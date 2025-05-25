@@ -1,13 +1,20 @@
 
 "use client";
 
-import React from 'react'; // Added React import for useCallback
+import React from 'react'; 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { Expense, Budget, Category, DataStore } from '@/lib/types';
+import type { Expense, Budget, Category } from '@/lib/types'; // Removed DataStore as it's not directly used by Zustand type
 import { siteConfig } from '@/config/site';
-import { format } from 'date-fns'; // Added for date formatting
+import { format } from "date-fns"; 
 
+// Define what an empty state looks like
+const emptyExpenses: Expense[] = [];
+const emptyBudgets: Budget[] = [];
+
+// Initial state for first-time load before any login/logout cycle
+// Or for users who might use the app without "logging in" if public parts were available.
+// For a strict login-required app, these might also be empty.
 const initialExpenses: Expense[] = [
   { id: '1', description: 'Groceries', amount: 75.50, category: 'Food & Drinks', date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
   { id: '2', description: 'Train ticket', amount: 22.00, category: 'Transportation', date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
@@ -28,13 +35,16 @@ type AppState = {
   addBudget: (budget: Omit<Budget, 'id' | 'spent' | 'remaining'>) => Budget;
   updateBudget: (budget: Omit<Budget, 'spent' | 'remaining'>) => void;
   deleteBudget: (id: string) => void;
+  clearUserData: () => void; // New function to clear data
 };
+
+const STORAGE_KEY = 'spendwise-storage';
 
 export const useDataStore = create<AppState>()(
   persist(
     (set, get) => ({
-      expenses: initialExpenses,
-      budgets: initialBudgets,
+      expenses: initialExpenses, // Load initial data
+      budgets: initialBudgets,   // Load initial data
 
       addExpense: (expense) => {
         const newExpense = { ...expense, id: crypto.randomUUID() };
@@ -62,7 +72,7 @@ export const useDataStore = create<AppState>()(
       updateBudget: (updatedBudget) => {
         set((state) => ({
           budgets: state.budgets.map((b) =>
-            b.id === updatedBudget.id ? { ...b, ...updatedBudget, spent: 0, remaining: 0 } : b // spent/remaining recalculated elsewhere
+            b.id === updatedBudget.id ? { ...b, ...updatedBudget, spent: 0, remaining: 0 } : b 
           ),
         }));
       },
@@ -71,20 +81,38 @@ export const useDataStore = create<AppState>()(
           budgets: state.budgets.filter((b) => b.id !== id),
         }));
       },
+      clearUserData: () => {
+        set({ expenses: emptyExpenses, budgets: emptyBudgets });
+        // Also explicitly clear the localStorage item if persist middleware doesn't handle this automatically on set
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(STORAGE_KEY); 
+          // Re-initialize with empty state to ensure persist picks it up if needed.
+          // This line might be redundant if set({expenses: [], budgets: []}) is enough
+          // for persist to overwrite the storage with an empty state.
+          // However, explicitly removing ensures no old data lingers.
+          // Then, to ensure the store is "re-persisted" as empty:
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            version: get().hasOwnProperty('version') ? (get() as any).version : 0, // maintain version if used by persist
+            state: { expenses: emptyExpenses, budgets: emptyBudgets }
+          }));
+        }
+      },
     }),
     {
-      name: 'spendwise-storage',
+      name: STORAGE_KEY, // Use the constant
       storage: createJSONStorage(() => localStorage),
+      // Versioning can be useful for migrations if the shape of your stored data changes
+      // version: 1, 
+      // migrate: (persistedState, version) => { ... }
     }
   )
 );
 
-// Selectors - these are not part of the persisted store but derive state
+// Selectors
 export const useCalculatedData = () => {
   const { expenses, budgets } = useDataStore();
 
-  const getTotalSpending = React.useCallback((period?: 'month' | 'year') => {
-    // Simple total for now, can be enhanced with period filtering
+  const getTotalSpending = React.useCallback(() => {
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
   }, [expenses]);
 
@@ -108,7 +136,7 @@ export const useCalculatedData = () => {
   }, [expenses, budgets]);
 
   const getBudgetProgress = React.useCallback((): Budget[] => {
-    const spendingByCategoryData = getSpendingByCategory(); // Uses the memoized version
+    const spendingByCategoryData = getSpendingByCategory(); 
     return budgets.map(budget => {
       const spent = spendingByCategoryData[budget.category] || 0;
       const remaining = budget.amount - spent;
@@ -118,20 +146,18 @@ export const useCalculatedData = () => {
 
   const getSpendingOverTime = React.useCallback(() => {
     if (expenses.length === 0) return [];
-
     const spendingByDate: Record<string, number> = {};
     expenses.forEach(exp => {
-      // Ensure date is valid before formatting
       try {
         const dateObj = new Date(exp.date);
         if (isNaN(dateObj.getTime())) {
-          console.warn(`Invalid date found for expense ID ${exp.id}: ${exp.date}`);
+          console.warn(\`Invalid date found for expense ID \${exp.id}: \${exp.date}\`);
           return; 
         }
         const dateKey = format(dateObj, 'yyyy-MM-dd');
         spendingByDate[dateKey] = (spendingByDate[dateKey] || 0) + exp.amount;
       } catch (e) {
-        console.warn(`Error processing date for expense ID ${exp.id}: ${exp.date}`, e);
+        console.warn(\`Error processing date for expense ID \${exp.id}: \${exp.date}\`, e);
       }
     });
     
@@ -149,6 +175,9 @@ export const useCalculatedData = () => {
     getBudgetProgress, 
     getExpensesByCategory,
     getAllCategories,
-    getSpendingOverTime, // Export new function
+    getSpendingOverTime, 
   };
 };
+
+// Call clearUserData on logout if needed, e.g., in AuthContext or a logout handler
+// This is now handled within AuthContext signOut.
