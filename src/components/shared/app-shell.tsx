@@ -43,8 +43,7 @@ function AppShellContent({ children }: AppShellProps) {
         <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
             <Sparkles className="h-7 w-7" />
-            {/* The span will be hidden in collapsed icon mode by sidebar.tsx styles */}
-            <span className="text-lg">{siteConfig.name}</span>
+            <span className="text-lg hidden group-data-[state=expanded]:inline">{siteConfig.name}</span>
           </Link>
         </SidebarHeader>
         <SidebarContent className="px-2 py-4 lg:px-4 flex-grow">
@@ -52,15 +51,13 @@ function AppShellContent({ children }: AppShellProps) {
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border p-2 lg:p-4">
           {user && (
-            // This text will be hidden in collapsed icon mode by sidebar.tsx styles
             <div className="text-xs text-sidebar-foreground/70 truncate mb-2 px-2 group-data-[state=expanded]:block hidden" title={user.email || ''}>
               Logged in as: {user.email}
             </div>
           )}
           <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
             <LogOut className="mr-2 h-5 w-5" />
-            {/* This span will be hidden in collapsed icon mode by sidebar.tsx styles */}
-            <span>Logout</span>
+            <span className="hidden group-data-[state=expanded]:inline">Logout</span>
           </Button>
         </SidebarFooter>
       </Sidebar>
