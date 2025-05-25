@@ -48,9 +48,12 @@ const useDataStore = create<AppState>((set, get) => ({
   userId: null,
 
   initializeUserSession: async (userId) => {
-    if (get().isInitialized && get().userId === userId && !get().isLoading) return; 
-
-    set({ isLoading: true, userId, isInitialized: false });
+    if (get().isInitialized && get().userId === userId && !get().isLoading) {
+      console.log("Data store: User session already initialized for", userId);
+      return;
+    }
+    console.log("Data store: Initializing user session for", userId);
+    set({ isLoading: true, userId, isInitialized: false, expenses: [], budgets: [] }); // Clear previous data for new user
     try {
       const expensesQuery = query(
         collection(db, `users/${userId}/expenses`),
@@ -73,33 +76,35 @@ const useDataStore = create<AppState>((set, get) => ({
         return {
           id: docSnap.id,
           ...data,
-          // These will be dynamically calculated by selectors/hooks
           spent: 0, 
           remaining: 0, 
         } as Budget;
       });
 
       set({ expenses: userExpenses, budgets: userBudgets, isLoading: false, isInitialized: true });
+      console.log("Data store: User session initialized successfully for", userId);
     } catch (error) {
-      console.error("Error loading user data from Firestore:", error);
-      set({ isLoading: false, isInitialized: false }); // Indicate loading failed
-      // Consider showing a global error toast here if critical data fails to load
+      console.error("Data store: Error loading user data from Firestore:", error);
+      set({ isLoading: false, isInitialized: false }); 
     }
   },
 
   clearUserSession: () => {
+    console.log("Data store: Clearing user session.");
     set({ expenses: [], budgets: [], isLoading: false, isInitialized: false, userId: null });
   },
 
   addExpense: async (expenseData) => {
     const userId = get().userId;
     if (!userId) {
-      console.error("No user ID found, cannot add expense.");
+      console.error("Data store: No user ID found, cannot add expense.");
       throw new Error("User not authenticated. Cannot add expense.");
     }
+    const expensePath = `users/${userId}/expenses`;
+    console.log(`Data store: Attempting to add expense for userId: ${userId} to path: ${expensePath}`);
     set({ isLoading: true });
     try {
-      const docRef = await addDoc(collection(db, `users/${userId}/expenses`), {
+      const docRef = await addDoc(collection(db, expensePath), {
         ...expenseData,
         date: Timestamp.fromDate(expenseData.date), 
       });
@@ -116,22 +121,23 @@ const useDataStore = create<AppState>((set, get) => ({
       }));
       return newExpense;
     } catch (error) {
-      console.error("Error adding expense to Firestore:", error);
+      console.error(`Data store: Error adding expense to Firestore at path ${expensePath}:`, error);
       set({ isLoading: false });
-      throw error; // Re-throw the error to be caught by the form
+      throw error; 
     }
   },
 
   updateExpense: async (expenseData) => {
     const userId = get().userId;
     if (!userId) {
-      console.error("No user ID found, cannot update expense.");
+      console.error("Data store: No user ID found, cannot update expense.");
       throw new Error("User not authenticated. Cannot update expense.");
     }
+    const expensePath = `users/${userId}/expenses/${expenseData.id}`;
+    console.log(`Data store: Attempting to update expense for userId: ${userId} at path: ${expensePath}`);
     set({ isLoading: true });
     try {
       const expenseRef = doc(db, `users/${userId}/expenses`, expenseData.id);
-      // Create a new object for Firestore without the 'id' field itself
       const { id, ...dataToUpdate } = expenseData;
       await updateDoc(expenseRef, {
         ...dataToUpdate,
@@ -151,7 +157,7 @@ const useDataStore = create<AppState>((set, get) => ({
         isLoading: false,
       }));
     } catch (error) {
-      console.error("Error updating expense in Firestore:", error);
+      console.error(`Data store: Error updating expense in Firestore at path ${expensePath}:`, error);
       set({ isLoading: false });
       throw error; 
     }
@@ -160,9 +166,11 @@ const useDataStore = create<AppState>((set, get) => ({
   deleteExpense: async (id) => {
     const userId = get().userId;
     if (!userId) {
-      console.error("No user ID found, cannot delete expense.");
+      console.error("Data store: No user ID found, cannot delete expense.");
       throw new Error("User not authenticated. Cannot delete expense.");
     }
+    const expensePath = `users/${userId}/expenses/${id}`;
+    console.log(`Data store: Attempting to delete expense for userId: ${userId} at path: ${expensePath}`);
     set({ isLoading: true });
     try {
       await deleteDoc(doc(db, `users/${userId}/expenses`, id));
@@ -171,7 +179,7 @@ const useDataStore = create<AppState>((set, get) => ({
         isLoading: false,
       }));
     } catch (error) {
-      console.error("Error deleting expense from Firestore:", error);
+      console.error(`Data store: Error deleting expense from Firestore at path ${expensePath}:`, error);
       set({ isLoading: false });
       throw error; 
     }
@@ -180,12 +188,14 @@ const useDataStore = create<AppState>((set, get) => ({
   addBudget: async (budgetData) => {
     const userId = get().userId;
     if (!userId) {
-      console.error("No user ID found, cannot add budget.");
+      console.error("Data store: No user ID found, cannot add budget.");
       throw new Error("User not authenticated. Cannot add budget.");
     }
+    const budgetPath = `users/${userId}/budgets`;
+    console.log(`Data store: Attempting to add budget for userId: ${userId} to collection: ${budgetPath}`);
     set({ isLoading: true });
     try {
-      const docRef = await addDoc(collection(db, `users/${userId}/budgets`), budgetData);
+      const docRef = await addDoc(collection(db, budgetPath), budgetData);
       const newBudget: Budget = {
         id: docRef.id,
         ...budgetData,
@@ -198,7 +208,7 @@ const useDataStore = create<AppState>((set, get) => ({
       }));
       return newBudget;
     } catch (error) {
-      console.error("Error adding budget to Firestore:", error);
+      console.error(`Data store: Error adding budget to Firestore at collection ${budgetPath}:`, error);
       set({ isLoading: false });
       throw error; 
     }
@@ -207,22 +217,24 @@ const useDataStore = create<AppState>((set, get) => ({
   updateBudget: async (budgetData) => {
     const userId = get().userId;
     if (!userId) {
-      console.error("No user ID found, cannot update budget.");
+      console.error("Data store: No user ID found, cannot update budget.");
       throw new Error("User not authenticated. Cannot update budget.");
     }
+    const budgetPath = `users/${userId}/budgets/${budgetData.id}`;
+    console.log(`Data store: Attempting to update budget for userId: ${userId} at path: ${budgetPath}`);
     set({ isLoading: true });
     try {
       const budgetRef = doc(db, `users/${userId}/budgets`, budgetData.id);
-      const { id, spent, remaining, ...dataToUpdate } = budgetData; // Exclude dynamic fields from Firestore write
+      const { id, spent, remaining, ...dataToUpdate } = budgetData; 
       await updateDoc(budgetRef, dataToUpdate);
       set((state) => ({
         budgets: state.budgets.map((b) =>
-          b.id === budgetData.id ? { ...b, ...budgetData } : b 
+          b.id === budgetData.id ? { ...b, ...dataToUpdate } : b // ...dataToUpdate already excludes spent and remaining
         ),
         isLoading: false,
       }));
     } catch (error) {
-      console.error("Error updating budget in Firestore:", error);
+      console.error(`Data store: Error updating budget in Firestore at path ${budgetPath}:`, error);
       set({ isLoading: false });
       throw error; 
     }
@@ -231,9 +243,11 @@ const useDataStore = create<AppState>((set, get) => ({
   deleteBudget: async (id) => {
     const userId = get().userId;
     if (!userId) {
-      console.error("No user ID found, cannot delete budget.");
+      console.error("Data store: No user ID found, cannot delete budget.");
       throw new Error("User not authenticated. Cannot delete budget.");
     }
+    const budgetPath = `users/${userId}/budgets/${id}`;
+    console.log(`Data store: Attempting to delete budget for userId: ${userId} at path: ${budgetPath}`);
     set({ isLoading: true });
     try {
       await deleteDoc(doc(db, `users/${userId}/budgets`, id));
@@ -242,7 +256,7 @@ const useDataStore = create<AppState>((set, get) => ({
         isLoading: false,
       }));
     } catch (error) {
-      console.error("Error deleting budget from Firestore:", error);
+      console.error(`Data store: Error deleting budget from Firestore at path ${budgetPath}:`, error);
       set({ isLoading: false });
       throw error; 
     }
@@ -324,5 +338,3 @@ export const useCalculatedData = () => {
 };
 
 export { useDataStore };
-
-    
