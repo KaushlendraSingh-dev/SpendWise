@@ -151,13 +151,13 @@ export const useCalculatedData = () => {
       try {
         const dateObj = new Date(exp.date);
         if (isNaN(dateObj.getTime())) {
-          console.warn(\`Invalid date found for expense ID \${exp.id}: \${exp.date}\`);
+          console.warn('Invalid date found for expense ID ' + exp.id + ': ' + exp.date);
           return; 
         }
         const dateKey = format(dateObj, 'yyyy-MM-dd');
         spendingByDate[dateKey] = (spendingByDate[dateKey] || 0) + exp.amount;
       } catch (e) {
-        console.warn(\`Error processing date for expense ID \${exp.id}: \${exp.date}\`, e);
+        console.warn('Error processing date for expense ID ' + exp.id + ': ' + exp.date, e);
       }
     });
     
@@ -181,3 +181,4 @@ export const useCalculatedData = () => {
 
 // Call clearUserData on logout if needed, e.g., in AuthContext or a logout handler
 // This is now handled within AuthContext signOut.
+
