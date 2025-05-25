@@ -8,14 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, LogIn, UserPlus } from 'lucide-react'; // Added UserPlus
+import { UserPlus, LogIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import Link from 'next/link'; // Added Link
+import Link from 'next/link';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, user, loading } = useAuth();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { signUp, user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,28 +36,40 @@ export default function LoginPage() {
   }
 
   if (user) {
-    return null; 
+    return null; // Will be redirected by useEffect
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast({ title: "Login Error", description: "Please enter both email and password.", variant: "destructive" });
+    if (!email || !password || !confirmPassword) {
+      toast({ title: "Signup Error", description: "Please fill in all fields.", variant: "destructive" });
       return;
     }
+    if (password !== confirmPassword) {
+      toast({ title: "Signup Error", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+    if (password.length < 6) {
+      toast({ title: "Signup Error", description: "Password must be at least 6 characters long.", variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await signIn(email, password);
-      toast({ title: "Login Successful", description: "Welcome back!"});
+      await signUp(email, password);
+      toast({ title: "Signup Successful", description: "Welcome! You are now logged in."});
+      // router.replace('/dashboard'); // Handled by useEffect
     } catch (error: any) {
-      console.error(error);
-      let errorMessage = "Failed to login. Please check your credentials.";
-      if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
-        errorMessage = "Invalid email or password.";
+      console.error("Signup Error:", error);
+      let errorMessage = "Failed to sign up. Please try again.";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "This email address is already in use.";
       } else if (error.code === "auth/invalid-email") {
         errorMessage = "Please enter a valid email address.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password is too weak. Please choose a stronger password.";
       }
-      toast({ title: "Login Failed", description: errorMessage, variant: "destructive" });
+      toast({ title: "Signup Failed", description: errorMessage, variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -67,10 +80,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Sparkles className="h-8 w-8" />
+            <UserPlus className="h-8 w-8" />
           </div>
-          <CardTitle className="text-3xl font-bold">Welcome to SpendWise</CardTitle>
-          <CardDescription>Please sign in to continue</CardDescription>
+          <CardTitle className="text-3xl font-bold">Create Account</CardTitle>
+          <CardDescription>Join SpendWise today!</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -91,9 +104,21 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="•••••••• (min. 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={isSubmitting}
               />
@@ -103,20 +128,19 @@ export default function LoginPage() {
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
               ) : (
                 <>
-                  <LogIn className="mr-2 h-5 w-5" /> Sign In
+                  <UserPlus className="mr-2 h-5 w-5" /> Sign Up
                 </>
               )}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col items-center text-sm space-y-2">
+        <CardFooter className="flex flex-col items-center text-sm">
           <p className="text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="font-medium text-primary hover:underline">
-              Sign Up
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-primary hover:underline">
+              Sign In
             </Link>
           </p>
-          <p className="text-xs text-muted-foreground/80">This is a demo. Create users in Firebase Console or use the signup page.</p>
         </CardFooter>
       </Card>
     </div>

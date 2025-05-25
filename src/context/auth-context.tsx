@@ -2,16 +2,23 @@
 "use client";
 
 import type { User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase'; // Added db import
+import { 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, // Added for signup
+  signOut as firebaseSignOut 
+} from 'firebase/auth';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useDataStore } from '@/hooks/use-data-store';
+// No need to import doc or setDoc from firestore here as data store handles it
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, pass: string) => Promise<User | null>;
+  signUp: (email: string, pass: string) => Promise<User | null>; // Added signUp
   signOut: () => Promise<void>;
 }
 
@@ -25,10 +32,10 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setLoading(true); // Set loading true at the start of auth state change
+      setLoading(true); 
       setUser(currentUser);
       if (currentUser) {
-        await initializeUserSession(currentUser.uid); // This now fetches expenses, budgets, AND notes
+        await initializeUserSession(currentUser.uid); 
       } else {
         clearUserSession();
       }
@@ -42,33 +49,42 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       // onAuthStateChanged will handle setting user and initializing session
-      // setUser(userCredential.user); // Let onAuthStateChanged handle this
-      // await initializeUserSession(userCredential.user.uid); // Let onAuthStateChanged handle this
       return userCredential.user;
     } catch (error) {
       console.error("Error signing in:", error);
-      // setUser(null); // onAuthStateChanged handles this
-      clearUserSession();
-      setLoading(false); // Ensure loading is false if signIn itself errors before onAuthStateChanged
+      clearUserSession(); 
+      setLoading(false); 
       throw error; 
     } 
-    // setLoading(false) will be called by onAuthStateChanged's effect
+  };
+
+  const signUp = async (email: string, pass: string): Promise<User | null> => {
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      // onAuthStateChanged will handle setting user and initializing session
+      // No need to manually create a user document here for simple auth,
+      // user-specific data is handled by useDataStore based on UID.
+      return userCredential.user;
+    } catch (error) {
+      console.error("Error signing up:", error);
+      clearUserSession();
+      setLoading(false);
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    // setLoading(true); // onAuthStateChanged handles loading state during user change
     try {
       await firebaseSignOut(auth);
       // onAuthStateChanged will handle setting user to null and clearing session
     } catch (error) {
       console.error("Error signing out:", error);
-      // setLoading(false); // Ensure loading is false if signOut itself errors before onAuthStateChanged
     }
-    // setLoading(false) will be called by onAuthStateChanged's effect
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
