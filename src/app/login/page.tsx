@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,12 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, loading, router]);
+
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -27,9 +33,10 @@ export default function LoginPage() {
     );
   }
 
+  // If user is already defined and not loading, useEffect will handle redirect.
+  // Return null here to prevent rendering the login form briefly before redirect.
   if (user) {
-    router.replace('/dashboard');
-    return null; 
+    return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,7 +49,7 @@ export default function LoginPage() {
     try {
       await signIn(email, password);
       toast({ title: "Login Successful", description: "Welcome back!"});
-      router.replace('/dashboard');
+      // router.replace('/dashboard'); // This will be handled by useEffect now
     } catch (error: any) {
       console.error(error);
       let errorMessage = "Failed to login. Please check your credentials.";
@@ -105,7 +112,7 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="text-center text-sm text-muted-foreground">
-          <p>This is a demo. Users are managed via Firebase Console.</p>
+          <p>This is a demo. Create users in Firebase Console to login.</p>
         </CardFooter>
       </Card>
     </div>
