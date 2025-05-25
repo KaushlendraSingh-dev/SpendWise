@@ -14,36 +14,28 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Client-side diagnostic logging
-// This will run in the browser and can help verify if client-side env vars are present.
-if (typeof window !== 'undefined') {
-  console.log("Firebase Config Check (Client-Side):");
-  if (!firebaseConfig.apiKey) {
-    console.error("CRITICAL DIAGNOSTIC (Client): NEXT_PUBLIC_FIREBASE_API_KEY is NOT SET or UNDEFINED in the client-side environment. Firebase cannot initialize properly.");
-  } else {
-    // console.log("NEXT_PUBLIC_FIREBASE_API_KEY (Client): SET"); // Value hidden for security
-  }
-} else {
-  // Basic server-side check for logging purposes (will appear in server logs).
-  console.log("Firebase Config Check (Server-Side):");
-  if (!firebaseConfig.apiKey) {
-    console.error("CRITICAL DIAGNOSTIC (Server): NEXT_PUBLIC_FIREBASE_API_KEY is MISSING or UNDEFINED on the server. Firebase initialization will likely fail, leading to 'auth/invalid-api-key' errors.");
-  } else {
-    // console.log("NEXT_PUBLIC_FIREBASE_API_KEY (Server): SET"); // Value hidden for security
-  }
+// Client-side diagnostic check for the API key
+if (typeof window !== 'undefined' && !firebaseConfig.apiKey) {
+  console.error(
+    "CRITICAL DIAGNOSTIC (Client): NEXT_PUBLIC_FIREBASE_API_KEY is NOT SET or UNDEFINED in the client-side environment. " +
+    "Firebase cannot initialize properly. " +
+    "Ensure this environment variable is correctly set (e.g., in .env.local or Firebase Studio settings) and the Next.js development server was restarted."
+  );
 }
 
 // Initialize Firebase
 let app: FirebaseApp;
 
 if (!getApps().length) {
-  // If firebaseConfig.apiKey is missing or invalid here,
-  // initializeApp might not throw an error immediately, but getAuth almost certainly will.
+  // initializeApp will use the firebaseConfig. If apiKey is missing/invalid (especially if undefined),
+  // getAuth() called later will likely throw the 'auth/invalid-api-key' error.
   app = initializeApp(firebaseConfig);
 } else {
   app = getApp();
 }
 
-// getAuth will throw "auth/invalid-api-key" if the app instance was initialized with an invalid API key.
-export const auth = getAuth(app);
+// The non-null assertion operator (!) assumes 'app' will be a valid FirebaseApp.
+// If initializeApp failed due to critically missing config (like apiKey being undefined),
+// 'app' might not be a valid FirebaseApp instance, and getAuth(app!) would then correctly throw an error.
+export const auth = getAuth(app!);
 export default app;
