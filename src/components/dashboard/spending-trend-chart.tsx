@@ -31,19 +31,17 @@ export function SpendingTrendChart() {
   const chartData = useMemo(() => {
     return spendingOverTimeData.map(item => ({
       ...item,
-      // Format date for display on X-axis if needed, or reformat in tickFormatter
-      // date: format(new Date(item.date), "MMM d"), 
     }));
   }, [spendingOverTimeData]);
 
   const currencyFormatter = (value: number) =>
-    `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
   
   const dateFormatter = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "MMM d");
     } catch {
-      return dateStr; // Fallback if date is not parsable (should not happen with yyyy-MM-dd)
+      return dateStr; 
     }
   }
 
@@ -86,8 +84,8 @@ export function SpendingTrendChart() {
             data={chartData}
             margin={{
               top: 5,
-              right: 20, // Adjusted for better label visibility
-              left: 10, // Adjusted for better label visibility
+              right: 20, 
+              left: 10, 
               bottom: 5,
             }}
           >
@@ -99,7 +97,6 @@ export function SpendingTrendChart() {
               tickLine={false}
               axisLine={false}
               tickFormatter={dateFormatter}
-              // interval="preserveStartEnd" // Adjust if too many ticks
             />
             <YAxis
               stroke="hsl(var(--muted-foreground))"
@@ -107,7 +104,7 @@ export function SpendingTrendChart() {
               tickLine={false}
               axisLine={false}
               tickFormatter={currencyFormatter}
-              width={80} // Increased width for currency values
+              width={80} 
             />
             <Tooltip
               cursor={{ stroke: 'hsl(var(--accent))', strokeWidth: 1 }}
@@ -117,8 +114,8 @@ export function SpendingTrendChart() {
                 borderRadius: 'var(--radius)',
                 boxShadow: 'var(--shadow-md)',
               }}
-              labelFormatter={(label) => format(new Date(label), "PPP")} // Full date in tooltip
-              formatter={(value: number) => [currencyFormatter(value), "Spent"]}
+              labelFormatter={(label) => format(new Date(label), "PPP")} 
+              formatter={(value: number) => [value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }), "Spent"]}
             />
             <Legend wrapperStyle={{fontSize: '12px'}}/>
             <Line

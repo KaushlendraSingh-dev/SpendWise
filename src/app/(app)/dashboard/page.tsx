@@ -51,7 +51,7 @@ export default function DashboardPage() {
         <OverviewCard
           title="Budget vs Actual"
           value={totalSpentVsBudget}
-          description={`Against a total budget of ${totalBudgeted.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`}
+          description={`Against a total budget of ${totalBudgeted.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}`}
           icon={ListChecks}
         />
       </div>

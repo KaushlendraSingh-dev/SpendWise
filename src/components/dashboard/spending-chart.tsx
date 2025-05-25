@@ -5,7 +5,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } fro
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useCalculatedData } from "@/hooks/use-data-store";
 import { useMemo } from "react";
-import { PieChart } from "lucide-react"; // Added icon import
+import { PieChart } from "lucide-react"; 
 import { cn } from "@/lib/utils";
 
 export function SpendingChart() {
@@ -15,7 +15,7 @@ export function SpendingChart() {
   const chartData = useMemo(() => {
     return Object.entries(spendingData)
       .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total); // Sort by total descending
+      .sort((a, b) => b.total - a.total); 
   }, [spendingData]);
 
   if (chartData.length === 0) {
@@ -35,7 +35,7 @@ export function SpendingChart() {
     );
   }
   
-  const currencyFormatter = (value: number) => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const currencyFormatter = (value: number) => value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
@@ -66,7 +66,7 @@ export function SpendingChart() {
               tickLine={false}
               axisLine={false}
               tickFormatter={currencyFormatter}
-              width={80} // Increased width for currency labels
+              width={80} 
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent) / 0.2)' }}
@@ -75,7 +75,7 @@ export function SpendingChart() {
                 borderColor: 'hsl(var(--border))',
                 borderRadius: 'var(--radius)',
               }}
-              formatter={(value: number) => currencyFormatter(value)}
+              formatter={(value: number) => value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2})}
             />
             <Legend wrapperStyle={{fontSize: '12px'}}/>
             <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Total Spent" />

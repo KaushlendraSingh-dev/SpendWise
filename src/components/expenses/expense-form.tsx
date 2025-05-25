@@ -69,7 +69,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
       }
     : {
         description: "",
-        amount: "" as any, // Initialize with empty string
+        amount: "" as any, 
         category: "",
         date: new Date(),
       };
@@ -92,7 +92,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
     } else {
       addExpense(expenseData);
       toast({ title: "Expense Added", description: "New expense logged successfully." });
-      form.reset({description: "", amount: "" as any, category: "", date: new Date() }); // Reset with empty string
+      form.reset({description: "", amount: "" as any, category: "", date: new Date() }); 
     }
     onFormSubmit?.();
     setOpen?.(false);
@@ -155,7 +155,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Amount ($)</FormLabel>
+              <FormLabel>Amount (₹)</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" placeholder="0.00" {...field} />
               </FormControl>

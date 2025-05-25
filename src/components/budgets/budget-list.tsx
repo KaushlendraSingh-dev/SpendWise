@@ -46,7 +46,7 @@ export function BudgetList() {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
 
-  const currencyFormatter = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const currencyFormatter = (value: number) => value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
 
   if (budgets.length === 0) {
     return <p className="text-muted-foreground mt-4">No budgets set yet. Create your first budget goal!</p>;
@@ -64,9 +64,9 @@ export function BudgetList() {
         }}
       >
         <ScrollArea className={cn(
-          "h-auto max-h-[300px] sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]", // Responsive max-heights
+          "h-auto max-h-[300px] sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]",
           "border rounded-md shadow-sm",
-          "transition-all duration-300 ease-in-out"
+          "hover:scale-105 hover:shadow-xl hover:border-accent transition-all duration-300 ease-in-out"
           )}>
           <Table>
             <TableHeader>
@@ -100,7 +100,7 @@ export function BudgetList() {
                          <Progress
                             value={Math.min(progressValue,100)}
                             className={cn(
-                              "w-[80px] sm:w-[100px] h-3", // Adjusted width for responsiveness
+                              "w-[80px] sm:w-[100px] h-3", 
                               isOverBudget
                                 ? "[&>div]:bg-destructive"
                                 : progressValue >= 70

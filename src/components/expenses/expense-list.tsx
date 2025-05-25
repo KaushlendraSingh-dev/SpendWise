@@ -42,7 +42,7 @@ export function ExpenseList() {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   
-  const currencyFormatter = (value: number) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const currencyFormatter = (value: number) => value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' });
 
   if (expenses.length === 0) {
     return <p className="text-muted-foreground mt-4">No expenses logged yet. Add your first expense!</p>;
@@ -62,9 +62,9 @@ export function ExpenseList() {
         }}
       >
         <ScrollArea className={cn(
-            "h-auto max-h-[300px] sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]", // Responsive max-heights
+            "h-auto max-h-[300px] sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]", 
             "border rounded-md shadow-sm",
-            "transition-all duration-300 ease-in-out"
+            "hover:scale-105 hover:shadow-xl hover:border-accent transition-all duration-300 ease-in-out"
           )}>
           <Table>
             <TableHeader>

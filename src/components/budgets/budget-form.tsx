@@ -128,7 +128,7 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Budget Amount ($)</FormLabel>
+              <FormLabel>Budget Amount (₹)</FormLabel>
               <FormControl>
                 <Input type="number" step="0.01" placeholder="0.00" {...field} />
               </FormControl>

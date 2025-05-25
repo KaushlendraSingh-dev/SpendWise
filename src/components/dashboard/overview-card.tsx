@@ -1,3 +1,4 @@
+
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,10 +19,9 @@ export function OverviewCard({ title, value, description, icon: Icon, className 
         {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold text-foreground">{typeof value === 'number' ? value.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : value}</div>
+        <div className="text-3xl font-bold text-foreground">{typeof value === 'number' ? value.toLocaleString('en-IN', { style: 'currency', currency: 'INR' }) : value}</div>
         {description && <p className="text-xs text-muted-foreground pt-1">{description}</p>}
       </CardContent>
     </Card>
   );
 }
-
