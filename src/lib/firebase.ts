@@ -15,6 +15,8 @@ const firebaseConfig = {
 };
 
 // Client-side diagnostic check for the API key
+// This helps confirm if the browser is receiving the API key.
+// If this logs an error, the .env.local setup or Studio env vars are likely the issue.
 if (typeof window !== 'undefined' && !firebaseConfig.apiKey) {
   console.error(
     "CRITICAL DIAGNOSTIC (Client): NEXT_PUBLIC_FIREBASE_API_KEY is NOT SET or UNDEFINED in the client-side environment. " +
@@ -28,14 +30,25 @@ let app: FirebaseApp;
 
 if (!getApps().length) {
   // initializeApp will use the firebaseConfig. If apiKey is missing/invalid (especially if undefined),
-  // getAuth() called later will likely throw the 'auth/invalid-api-key' error.
-  app = initializeApp(firebaseConfig);
+  // it might not throw immediately, but getAuth() called later will likely throw the 'auth/invalid-api-key' error.
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+    // Optionally, rethrow or handle as a critical failure if app remains uninitialized
+    // For now, we let getAuth handle uninitialized app scenarios.
+    // @ts-ignore - app could be undefined if initializeApp fails catastrophically
+    app = undefined; 
+  }
 } else {
   app = getApp();
 }
 
-// The non-null assertion operator (!) assumes 'app' will be a valid FirebaseApp.
-// If initializeApp failed due to critically missing config (like apiKey being undefined),
-// 'app' might not be a valid FirebaseApp instance, and getAuth(app!) would then correctly throw an error.
+// The non-null assertion operator (!) implies 'app' is expected to be a valid FirebaseApp.
+// If 'app' is undefined due to a catastrophic failure in initializeApp (e.g., API key was so malformed
+// that even the basic config object couldn't be processed, though typically it proceeds to getAuth to fail),
+// getAuth(app!) would then correctly throw an error.
+// If NEXT_PUBLIC_FIREBASE_API_KEY is simply undefined, initializeApp proceeds,
+// but getAuth will throw 'auth/invalid-api-key'.
 export const auth = getAuth(app!);
 export default app;
