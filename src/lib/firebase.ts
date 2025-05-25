@@ -15,16 +15,21 @@ const firebaseConfig = {
 };
 
 // Client-side diagnostic logging
+// This will run in the browser and can help verify if client-side env vars are present.
 if (typeof window !== 'undefined') {
+  console.log("Firebase Config Check (Client-Side):");
   if (!firebaseConfig.apiKey) {
-    console.error("CRITICAL DIAGNOSTIC (Client): NEXT_PUBLIC_FIREBASE_API_KEY is NOT SET or UNDEFINED in the client-side environment.");
+    console.error("CRITICAL DIAGNOSTIC (Client): NEXT_PUBLIC_FIREBASE_API_KEY is NOT SET or UNDEFINED in the client-side environment. Firebase cannot initialize properly.");
   } else {
-    // console.log("Firebase Config Check (Client): NEXT_PUBLIC_FIREBASE_API_KEY is SET.");
+    // console.log("NEXT_PUBLIC_FIREBASE_API_KEY (Client): SET"); // Value hidden for security
   }
-  if (!firebaseConfig.projectId) {
-    // console.error("Firebase Config Check (Client): NEXT_PUBLIC_FIREBASE_PROJECT_ID is NOT SET or UNDEFINED.");
+} else {
+  // Basic server-side check for logging purposes (will appear in server logs).
+  console.log("Firebase Config Check (Server-Side):");
+  if (!firebaseConfig.apiKey) {
+    console.error("CRITICAL DIAGNOSTIC (Server): NEXT_PUBLIC_FIREBASE_API_KEY is MISSING or UNDEFINED on the server. Firebase initialization will likely fail, leading to 'auth/invalid-api-key' errors.");
   } else {
-    // console.log("Firebase Config Check (Client): NEXT_PUBLIC_FIREBASE_PROJECT_ID is SET.");
+    // console.log("NEXT_PUBLIC_FIREBASE_API_KEY (Server): SET"); // Value hidden for security
   }
 }
 
@@ -32,29 +37,13 @@ if (typeof window !== 'undefined') {
 let app: FirebaseApp;
 
 if (!getApps().length) {
-  // Server-side check for API Key presence before attempting initialization
-  // This log helps confirm if the server environment is providing the key.
-  if (typeof window === 'undefined' && !firebaseConfig.apiKey) {
-    console.error("Firebase Config Check (Server-Side): NEXT_PUBLIC_FIREBASE_API_KEY is MISSING or UNDEFINED. Firebase initialization will likely fail.");
-    // We do not throw an error here; we let initializeApp attempt and fail if config is truly bad.
-  }
-  try {
-    app = initializeApp(firebaseConfig);
-  } catch (error: any) {
-    console.error("Firebase initializeApp failed. This usually means your NEXT_PUBLIC_FIREBASE_... environment variables are not set correctly in your environment (e.g., Firebase Studio settings or .env.local), OR they are set but INVALID (e.g., wrong API key, incorrect project ID, or domain not authorized for this key). Please verify your environment configuration and RESTART your development server/environment. Original error:", error.message);
-    // If on the server, re-throw to make it clear initialization failed,
-    // as this is critical for server-side operations relying on Firebase.
-    if (typeof window === 'undefined') {
-        throw error;
-    }
-    // On the client, the console error is shown, and subsequent Firebase calls will fail.
-    // app will remain undefined, and getAuth(app!) will likely throw.
-  }
+  // If firebaseConfig.apiKey is missing or invalid here,
+  // initializeApp might not throw an error immediately, but getAuth almost certainly will.
+  app = initializeApp(firebaseConfig);
 } else {
   app = getApp();
 }
 
-// @ts-ignore - app could be undefined if initializeApp fails catastrophically above.
-// getAuth itself will throw if app is not a valid FirebaseApp instance or is undefined.
-export const auth = getAuth(app!);
+// getAuth will throw "auth/invalid-api-key" if the app instance was initialized with an invalid API key.
+export const auth = getAuth(app);
 export default app;
