@@ -6,7 +6,7 @@ import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useDataStore } from '@/hooks/use-data-store'; // To clear data on logout
+import { useDataStore } from '@/hooks/use-data-store';
 
 interface AuthContextType {
   user: User | null;
@@ -20,42 +20,46 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { clearUserData } = useDataStore();
+  const { initializeUserSession, clearUserSession } = useDataStore();
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        await initializeUserSession(currentUser.uid);
+      } else {
+        clearUserSession();
+      }
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [initializeUserSession, clearUserSession]);
 
   const signIn = async (email: string, pass: string): Promise<User | null> => {
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-      setUser(userCredential.user);
+      // onAuthStateChanged will handle setting user and initializing session
       return userCredential.user;
     } catch (error) {
       console.error("Error signing in:", error);
-      setUser(null); // Ensure user is null on error
-      throw error; // Re-throw error to be caught by caller
+      // setUser(null); // onAuthStateChanged handles this
+      clearUserSession();
+      throw error; 
     } finally {
-      setLoading(false);
+      // setLoading(false); // onAuthStateChanged handles final loading state
     }
   };
 
   const signOut = async () => {
-    setLoading(true);
+    // setLoading(true); // onAuthStateChanged handles loading state during user change
     try {
       await firebaseSignOut(auth);
-      setUser(null);
-      clearUserData(); // Clear user-specific data from Zustand store
+      // onAuthStateChanged will handle setting user to null and clearing session
     } catch (error) {
       console.error("Error signing out:", error);
-    } finally {
-      setLoading(false);
+      // setLoading(false); // Ensure loading is false if signOut itself errors before onAuthStateChanged
     }
   };
 
