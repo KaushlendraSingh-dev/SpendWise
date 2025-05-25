@@ -9,11 +9,19 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar, // Import useSidebar
 } from '@/components/ui/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar(); // Get context values
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false); // Close sidebar on mobile after click
+    }
+  };
 
   return (
     <ScrollArea className="flex-1">
@@ -31,6 +39,7 @@ export function SidebarNav() {
                       : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   )}
                   tooltip={item.title}
+                  onClick={handleLinkClick} // Add onClick handler
                 >
                   {item.icon && <item.icon className="mr-2 h-5 w-5" />}
                   <span>{item.title}</span>
