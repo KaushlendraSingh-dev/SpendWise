@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BudgetForm } from "./budget-form";
 import { useDataStore, useCalculatedData } from "@/hooks/use-data-store";
 import type { Budget } from "@/lib/types";
@@ -54,102 +54,17 @@ export function BudgetList() {
 
   return (
     <>
+      {/* Edit Dialog - Now separate and controlled */}
       <Dialog
-        open={isEditDialogOpen}
+        open={isEditDialogOpen && !!selectedBudget}
         onOpenChange={(open) => {
           setIsEditDialogOpen(open);
           if (!open) {
-            setSelectedBudget(null);
+            setSelectedBudget(null); // Clear selected budget when dialog closes
           }
         }}
       >
-        <ScrollArea className={cn(
-          "h-auto sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]", // Removed max-h-[300px] for base
-          "border rounded-md shadow-sm",
-          "hover:shadow-xl hover:border-accent transition-all duration-300 ease-in-out" // Removed hover:scale-105
-          )}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead>Budget Amount</TableHead>
-                <TableHead>Amount Spent</TableHead>
-                <TableHead>Remaining</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead className="w-[50px] text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {budgets.map((budget) => {
-                const progressValue = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
-                const isOverBudget = budget.spent > budget.amount;
-                return (
-                  <TableRow 
-                    key={budget.id}
-                    className={cn(
-                      "relative transition-all duration-150 ease-in-out",
-                      "hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10"
-                    )}
-                  >
-                    <TableCell className="font-medium">{budget.category}</TableCell>
-                    <TableCell>{currencyFormatter(budget.amount)}</TableCell>
-                    <TableCell className={cn(isOverBudget && "text-destructive")}>{currencyFormatter(budget.spent)}</TableCell>
-                    <TableCell className={cn(budget.remaining < 0 && "text-destructive")}>{currencyFormatter(budget.remaining)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                         <Progress
-                            value={Math.min(progressValue,100)}
-                            className={cn(
-                              "w-[60px] sm:w-[80px] md:w-[100px] h-3", 
-                              isOverBudget
-                                ? "[&>div]:bg-destructive"
-                                : progressValue >= 70
-                                ? "[&>div]:bg-orange-500" 
-                                : progressValue > 50 
-                                ? "[&>div]:bg-yellow-400" 
-                                : "" 
-                            )}
-                          />
-                         <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DialogTrigger asChild>
-                            <DropdownMenuItem onClick={() => setSelectedBudget(budget)}>
-                              <Edit2 className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                          </DialogTrigger>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                            onClick={() => {
-                              setSelectedBudget(budget);
-                              setIsDeleteAlertOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-
-        {/* Edit Dialog Content */}
-        {selectedBudget && isEditDialogOpen && (
+        {selectedBudget && (
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Edit Budget</DialogTitle>
@@ -158,12 +73,102 @@ export function BudgetList() {
               budget={selectedBudget}
               onFormSubmit={() => {
                 setIsEditDialogOpen(false);
+                setSelectedBudget(null);
               }}
               setOpen={setIsEditDialogOpen}
             />
           </DialogContent>
         )}
       </Dialog>
+
+      {/* Main Budget List Display */}
+      <ScrollArea className={cn(
+          "h-auto sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]",
+          "border rounded-md shadow-sm",
+          "hover:shadow-xl hover:border-accent transition-all duration-300 ease-in-out"
+        )}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Category</TableHead>
+              <TableHead>Budget Amount</TableHead>
+              <TableHead>Amount Spent</TableHead>
+              <TableHead>Remaining</TableHead>
+              <TableHead>Progress</TableHead>
+              <TableHead className="w-[50px] text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {budgets.map((budget) => {
+              const progressValue = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
+              const isOverBudget = budget.spent > budget.amount;
+              return (
+                <TableRow
+                  key={budget.id}
+                  className={cn(
+                    "relative transition-all duration-150 ease-in-out",
+                    "hover:scale-[1.01] hover:shadow-lg hover:bg-muted/80 hover:z-10"
+                  )}
+                >
+                  <TableCell className="font-medium">{budget.category}</TableCell>
+                  <TableCell>{currencyFormatter(budget.amount)}</TableCell>
+                  <TableCell className={cn(isOverBudget && "text-destructive")}>{currencyFormatter(budget.spent)}</TableCell>
+                  <TableCell className={cn(budget.remaining < 0 && "text-destructive")}>{currencyFormatter(budget.remaining)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                        <Progress
+                          value={Math.min(progressValue,100)}
+                          className={cn(
+                            "w-[60px] sm:w-[80px] md:w-[100px] h-3",
+                            isOverBudget
+                              ? "[&>div]:bg-destructive"
+                              : progressValue >= 70 && progressValue < 100
+                              ? "[&>div]:bg-orange-500"
+                              : progressValue >= 50 && progressValue < 70
+                              ? "[&>div]:bg-yellow-400"
+                              : ""
+                          )}
+                        />
+                        <span className="text-xs text-muted-foreground">{Math.round(progressValue)}%</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedBudget(budget);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <Edit2 className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                          onClick={() => {
+                            setSelectedBudget(budget);
+                            setIsDeleteAlertOpen(true);
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </ScrollArea>
 
       {/* Delete Alert Dialog */}
       <AlertDialog
@@ -185,7 +190,7 @@ export function BudgetList() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
-              setSelectedBudget(null);
+              setSelectedBudget(null); // Also clear here
             }}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
@@ -202,4 +207,3 @@ export function BudgetList() {
     </>
   );
 }
-
