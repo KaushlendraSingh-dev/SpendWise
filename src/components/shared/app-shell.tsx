@@ -10,7 +10,6 @@ import { Menu, Sparkles, LogOut } from 'lucide-react';
 import { SidebarNav } from './sidebar-nav';
 import { ScrollArea } from '../ui/scroll-area';
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, useSidebar, SidebarTrigger } from '@/components/ui/sidebar';
-// import { CurrentTime } from './current-time'; // Removed import
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
 import type { PropsWithChildren } from 'react';
@@ -38,15 +37,15 @@ function AppShellContent({ children }: AppShellProps) {
   };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[auto_1fr]"> {/* Changed md:grid-cols for auto width */}
-      <Sidebar className="border-r bg-sidebar text-sidebar-foreground" collapsible="icon"> {/* Enable icon collapsible mode */}
-        <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
+    <div className="grid min-h-screen w-full md:grid-cols-[auto_1fr]">
+      <Sidebar className="border-r bg-sidebar text-sidebar-foreground" collapsible="icon">
+        <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border group-data-[state=expanded]:px-4 group-data-[state=collapsed]:px-2 lg:h-[60px] lg:group-data-[state=expanded]:px-6 lg:group-data-[state=collapsed]:px-2">
+          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80 group-data-[state=collapsed]:w-full group-data-[state=collapsed]:justify-center group-data-[state=collapsed]:gap-0">
             <Sparkles className="h-7 w-7 text-primary" />
             <span className="text-lg hidden group-data-[state=expanded]:inline">{siteConfig.name}</span>
           </Link>
         </SidebarHeader>
-        <SidebarContent className="px-2 py-4 lg:px-4 flex-grow">
+        <SidebarContent className="flex-grow group-data-[state=expanded]:px-2 group-data-[state=expanded]:py-4 lg:group-data-[state=expanded]:px-4 group-data-[state=collapsed]:px-0 group-data-[state=collapsed]:py-2">
           <SidebarNav />
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border p-2 lg:p-4">
@@ -55,8 +54,8 @@ function AppShellContent({ children }: AppShellProps) {
               Logged in as: {user.email}
             </div>
           )}
-          <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
-            <LogOut className="mr-2 h-5 w-5 text-primary" />
+          <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[state=collapsed]:justify-center" onClick={handleLogout}>
+            <LogOut className="mr-2 h-5 w-5 text-primary group-data-[state=collapsed]:mr-0" />
             <span className="hidden group-data-[state=expanded]:inline">Logout</span>
           </Button>
         </SidebarFooter>
@@ -107,7 +106,6 @@ function AppShellContent({ children }: AppShellProps) {
           <div className="w-full flex-1">
             {/* Optional: Add search or other header elements here */}
           </div>
-          {/* <CurrentTime />  Removed CurrentTime component */}
         </header>
         <main className="flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
           <ScrollArea className="h-[calc(100vh-5rem)]">
