@@ -42,7 +42,7 @@ function AppShellContent({ children }: AppShellProps) {
       <Sidebar className="border-r bg-sidebar text-sidebar-foreground" collapsible="icon"> {/* Enable icon collapsible mode */}
         <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
-            <Sparkles className="h-7 w-7" />
+            <Sparkles className="h-7 w-7 text-primary" />
             <span className="text-lg hidden group-data-[state=expanded]:inline">{siteConfig.name}</span>
           </Link>
         </SidebarHeader>
@@ -56,7 +56,7 @@ function AppShellContent({ children }: AppShellProps) {
             </div>
           )}
           <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
-            <LogOut className="mr-2 h-5 w-5" />
+            <LogOut className="mr-2 h-5 w-5 text-primary" />
             <span className="hidden group-data-[state=expanded]:inline">Logout</span>
           </Button>
         </SidebarFooter>
@@ -80,7 +80,7 @@ function AppShellContent({ children }: AppShellProps) {
             <SheetContent side="left" className="flex flex-col p-0 w-[280px] sm:max-w-[280px] bg-sidebar text-sidebar-foreground border-sidebar-border">
               <div className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
                 <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
-                  <Sparkles className="h-7 w-7" />
+                  <Sparkles className="h-7 w-7 text-primary" />
                   <span className="text-lg">{siteConfig.name}</span>
                 </Link>
               </div>
@@ -94,7 +94,7 @@ function AppShellContent({ children }: AppShellProps) {
                     </div>
                   )}
                   <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
-                    <LogOut className="mr-2 h-5 w-5" />
+                    <LogOut className="mr-2 h-5 w-5 text-primary" />
                     Logout
                   </Button>
                 </div>

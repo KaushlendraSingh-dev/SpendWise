@@ -41,7 +41,7 @@ export function SidebarNav() {
                   tooltip={item.title} // Pass item title for tooltip
                   onClick={handleLinkClick}
                 >
-                  {item.icon && <item.icon className="mr-2 h-5 w-5" />}
+                  {item.icon && <item.icon className="mr-2 h-5 w-5 text-primary" />}
                   {/* The span for the label will be handled by SidebarMenuButton styles for collapsed mode */}
                   <span>{item.title}</span>
                 </SidebarMenuButton>
