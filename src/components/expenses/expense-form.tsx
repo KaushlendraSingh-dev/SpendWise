@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useDataStore, useCalculatedData } from "@/hooks/use-data-store";
 import { useToast } from "@/hooks/use-toast";
-import { siteConfig } from "@/config/site";
+// siteConfig is not directly used for categories here anymore for new expenses
 import type { Expense } from "@/lib/types";
 import { handleSuggestCategoryAction } from "@/lib/actions";
 import React, { useState, useEffect } from "react";
@@ -37,7 +37,7 @@ import React, { useState, useEffect } from "react";
 const expenseFormSchema = z.object({
   description: z.string().min(2, "Description must be at least 2 characters.").max(100, "Description is too long."),
   amount: z.coerce.number().positive("Amount must be positive."),
-  category: z.string().min(1, "Please select a category."),
+  category: z.string().min(1, "Please select a category with an active budget."),
   date: z.date({ required_error: "Please select a date." }),
 });
 
@@ -51,15 +51,24 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps) {
   const { addExpense, updateExpense } = useDataStore();
-  const { getAllCategories } = useCalculatedData();
+  const { budgets: userBudgets } = useCalculatedData(); // Get user's set budgets
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const { toast } = useToast();
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  
   useEffect(() => {
-    setAvailableCategories(getAllCategories());
-  }, [getAllCategories]);
+    let categoriesForSelect: string[];
+    const budgetedCategories = userBudgets.map(b => b.category);
+
+    if (expense) { // If editing an existing expense
+      // Ensure the current expense's category is in the list, plus all budgeted categories
+      categoriesForSelect = Array.from(new Set([...budgetedCategories, expense.category]));
+    } else { // If adding a new expense
+      categoriesForSelect = budgetedCategories;
+    }
+    setAvailableCategories(categoriesForSelect.sort((a,b) => a.localeCompare(b)));
+  }, [userBudgets, expense]);
   
   const defaultValues: Partial<ExpenseFormValues> = expense
     ? {
@@ -84,12 +93,11 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
 
   async function onSubmit(data: ExpenseFormValues) {
     setIsSubmitting(true);
-    // Ensure data.date is a Date object for the store functions
     const expensePayload = {
       description: data.description,
       amount: data.amount,
       category: data.category,
-      date: data.date, // This is already a Date object from react-hook-form
+      date: data.date, 
     };
 
     try {
@@ -129,11 +137,14 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
       if (result.error) {
         toast({ title: "Suggestion Failed", description: result.error, variant: "destructive" });
       } else if (result.category) {
-        form.setValue("category", result.category, { shouldValidate: true });
-        if (!availableCategories.includes(result.category)) {
-          setAvailableCategories(prev => [...prev, result.category!].sort());
+        // Only set the value if it's an available (budgeted) category for new expenses,
+        // or if it's the expense's current category when editing.
+        if (availableCategories.includes(result.category)) {
+          form.setValue("category", result.category, { shouldValidate: true });
+        } else if (expense && expense.category === result.category) {
+           form.setValue("category", result.category, { shouldValidate: true });
         }
-        toast({ title: "Category Suggested!", description: `We think '${result.category}' is a good fit (Confidence: ${Math.round((result.confidence || 0)*100)}%).` });
+        toast({ title: "Category Suggested!", description: `We think '${result.category}' is a good fit (Confidence: ${Math.round((result.confidence || 0)*100)}%). You may need to set a budget for this category if it's not selectable.` });
       }
     } catch (error: any) {
         console.error("AI Suggestion Error:", error);
@@ -190,20 +201,31 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={isSubmitting}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder="Select a category with a budget" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {availableCategories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {availableCategories.length > 0 ? (
+                    availableCategories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))
+                  ) : (
+                     <SelectItem value="no_category_budgeted" disabled>
+                      {expense && expense.category ? expense.category : "No budgeted categories. Set a budget first."}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
+              {availableCategories.length === 0 && !expense && (
+                <FormDescription>
+                  Please set a budget for a category before adding expenses to it.
+                </FormDescription>
+              )}
               <FormMessage />
             </FormItem>
           )}
@@ -250,7 +272,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isSubmitting}>
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isSubmitting || (availableCategories.length === 0 && !expense) }>
           {isSubmitting ? (
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
           ) : (
@@ -261,5 +283,3 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
     </Form>
   );
 }
-
-    
