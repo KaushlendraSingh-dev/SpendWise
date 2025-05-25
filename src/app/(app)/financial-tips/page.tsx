@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -33,8 +34,8 @@ export default function FinancialTipsPage() {
         title="Financial Tips"
         description="Get helpful AI-powered suggestions to manage your finances better."
         icon={Lightbulb}
-        imageUrl="https://placehold.co/300x200.png"
-        imageHint="idea lightbulb"
+        imageUrl="https://cdn-icons-png.flaticon.com/512/12695/12695878.png"
+        imageHint="helpful tips lightbulb"
       />
       <div className="mt-6">
         <Card className={cn(
