@@ -9,17 +9,17 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  useSidebar, // Import useSidebar
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function SidebarNav() {
   const pathname = usePathname();
-  const { isMobile, setOpenMobile } = useSidebar(); // Get context values
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const handleLinkClick = () => {
     if (isMobile) {
-      setOpenMobile(false); // Close sidebar on mobile after click
+      setOpenMobile(false);
     }
   };
 
@@ -35,13 +35,14 @@ export function SidebarNav() {
                   className={cn(
                     'w-full justify-start',
                     pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard" && item.href.length > 1 && pathname.startsWith(item.href + '/'))
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground' // Removed font-semibold and hover for active
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
                       : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   )}
-                  tooltip={item.title}
-                  onClick={handleLinkClick} // Add onClick handler
+                  tooltip={item.title} // Pass item title for tooltip
+                  onClick={handleLinkClick}
                 >
                   {item.icon && <item.icon className="mr-2 h-5 w-5" />}
+                  {/* The span for the label will be handled by SidebarMenuButton styles for collapsed mode */}
                   <span>{item.title}</span>
                 </SidebarMenuButton>
               </Link>

@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetTrigger }from '@/components/ui/sheet';
 import { Menu, Sparkles, LogOut } from 'lucide-react'; 
 import { SidebarNav } from './sidebar-nav';
 import { ScrollArea } from '../ui/scroll-area';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, useSidebar } from '@/components/ui/sidebar'; 
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, useSidebar, SidebarTrigger } from '@/components/ui/sidebar'; 
 import { CurrentTime } from './current-time';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
@@ -38,11 +38,12 @@ function AppShellContent({ children }: AppShellProps) {
   };
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <Sidebar className="border-r bg-sidebar text-sidebar-foreground">
+    <div className="grid min-h-screen w-full md:grid-cols-[auto_1fr]"> {/* Changed md:grid-cols for auto width */}
+      <Sidebar className="border-r bg-sidebar text-sidebar-foreground" collapsible="icon"> {/* Enable icon collapsible mode */}
         <SidebarHeader className="flex h-14 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-primary-foreground hover:text-sidebar-primary-foreground/80">
             <Sparkles className="h-7 w-7" />
+            {/* The span will be hidden in collapsed icon mode by sidebar.tsx styles */}
             <span className="text-lg">{siteConfig.name}</span>
           </Link>
         </SidebarHeader>
@@ -51,29 +52,32 @@ function AppShellContent({ children }: AppShellProps) {
         </SidebarContent>
         <SidebarFooter className="border-t border-sidebar-border p-2 lg:p-4">
           {user && (
-            <div className="text-xs text-sidebar-foreground/70 truncate mb-2 px-2" title={user.email || ''}>
+            // This text will be hidden in collapsed icon mode by sidebar.tsx styles
+            <div className="text-xs text-sidebar-foreground/70 truncate mb-2 px-2 group-data-[state=expanded]:block hidden" title={user.email || ''}>
               Logged in as: {user.email}
             </div>
           )}
           <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={handleLogout}>
             <LogOut className="mr-2 h-5 w-5" />
-            Logout
+            {/* This span will be hidden in collapsed icon mode by sidebar.tsx styles */}
+            <span>Logout</span>
           </Button>
         </SidebarFooter>
       </Sidebar>
       
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6">
-          <Sheet open={openMobile} onOpenChange={setOpenMobile}> {/* Controlled Sheet */}
+          {/* Mobile Menu Toggle */}
+          <Sheet open={openMobile} onOpenChange={setOpenMobile}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                className="shrink-0 md:hidden"
-                onClick={toggleSidebar} // Use toggleSidebar from context
+                className="shrink-0 md:hidden" // Only visible on mobile
+                onClick={toggleSidebar} 
               >
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
+                <span className="sr-only">Toggle mobile navigation menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0 w-[280px] sm:max-w-[280px] bg-sidebar text-sidebar-foreground border-sidebar-border">
@@ -84,7 +88,7 @@ function AppShellContent({ children }: AppShellProps) {
                 </Link>
               </div>
               <nav className="grid gap-2 p-4 text-lg font-medium flex-grow">
-                <SidebarNav /> {/* This SidebarNav will call setOpenMobile(false) on click */}
+                <SidebarNav />
               </nav>
                <div className="border-t border-sidebar-border p-4">
                   {user && (
@@ -99,15 +103,18 @@ function AppShellContent({ children }: AppShellProps) {
                 </div>
             </SheetContent>
           </Sheet>
+          
+          {/* Desktop Sidebar Toggle Button */}
+          <SidebarTrigger className="hidden md:flex" /> {/* Visible on md+ screens */}
+
           <div className="w-full flex-1">
             {/* Optional: Add search or other header elements here */}
           </div>
           <CurrentTime /> 
-          {/* Optional: Add user dropdown menu here */}
         </header>
         <main className="flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
           <ScrollArea className="h-[calc(100vh-5rem)]"> 
-             <div className="pr-4 pb-4"> {/* Add padding for scrollbar and bottom content */}
+             <div className="pr-4 pb-4">
                 {children}
              </div>
           </ScrollArea>
