@@ -5,7 +5,7 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } fro
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useCalculatedData } from "@/hooks/use-data-store";
 import { useMemo } from "react";
-import { PieChart } from "lucide-react"; 
+import { PieChart as PieChartIcon } from "lucide-react"; // Renamed to avoid conflict
 import { cn } from "@/lib/utils";
 
 export function SpendingChart() {
@@ -15,15 +15,21 @@ export function SpendingChart() {
   const chartData = useMemo(() => {
     return Object.entries(spendingData)
       .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total); 
+      .sort((a, b) => b.total - a.total);
   }, [spendingData]);
+
+  const tooltipContentStyle = useMemo(() => ({
+    backgroundColor: 'hsl(var(--background))',
+    borderColor: 'hsl(var(--border))',
+    borderRadius: 'var(--radius)',
+  }), []); // Assuming theme variables don't change frequently after load
 
   if (chartData.length === 0) {
     return (
       <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <PieChart className="mr-2 h-5 w-5 text-muted-foreground" />
+            <PieChartIcon className="mr-2 h-5 w-5 text-muted-foreground" />
             Spending by Category
           </CardTitle>
           <CardDescription>Your spending breakdown will appear here.</CardDescription>
@@ -34,14 +40,14 @@ export function SpendingChart() {
       </Card>
     );
   }
-  
+
   const currencyFormatter = (value: number) => value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   return (
     <Card className={cn("shadow-lg hover:border-accent transition-colors duration-300 ease-in-out")}>
       <CardHeader>
         <CardTitle className="flex items-center">
-          <PieChart className="mr-2 h-5 w-5 text-muted-foreground" />
+          <PieChartIcon className="mr-2 h-5 w-5 text-muted-foreground" />
           Spending by Category
         </CardTitle>
         <CardDescription>Visualizing your expenses across different categories.</CardDescription>
@@ -55,10 +61,10 @@ export function SpendingChart() {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              interval={0} 
-              angle={-30} 
+              interval={0}
+              angle={-30}
               textAnchor="end"
-              height={60} 
+              height={60}
             />
             <YAxis
               stroke="hsl(var(--muted-foreground))"
@@ -66,15 +72,11 @@ export function SpendingChart() {
               tickLine={false}
               axisLine={false}
               tickFormatter={currencyFormatter}
-              width={80} 
+              width={80}
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent) / 0.2)' }}
-              contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
-                borderColor: 'hsl(var(--border))',
-                borderRadius: 'var(--radius)',
-              }}
+              contentStyle={tooltipContentStyle}
               formatter={(value: number) => value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2})}
             />
             <Legend wrapperStyle={{fontSize: '12px'}}/>

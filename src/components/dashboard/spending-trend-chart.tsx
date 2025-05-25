@@ -34,17 +34,27 @@ export function SpendingTrendChart() {
     }));
   }, [spendingOverTimeData]);
 
+  const tooltipContentStyle = useMemo(() => ({
+    backgroundColor: 'hsl(var(--background))',
+    borderColor: 'hsl(var(--border))',
+    borderRadius: 'var(--radius)',
+    boxShadow: 'var(--shadow-md)', // Assuming --shadow-md is defined or a standard Tailwind shadow
+  }), []); // Assuming theme variables don't change frequently
+
+  const lineDotStyle = useMemo(() => ({ r: 3, strokeWidth: 1, fill: 'hsl(var(--primary))' }), []);
+  const lineActiveDotStyle = useMemo(() => ({ r: 5, strokeWidth: 2 }), []);
+
+
   const currencyFormatter = (value: number) =>
     value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  
+
   const dateFormatter = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "MMM d");
     } catch {
-      return dateStr; 
+      return dateStr;
     }
   }
-
 
   if (chartData.length === 0) {
     return (
@@ -84,8 +94,8 @@ export function SpendingTrendChart() {
             data={chartData}
             margin={{
               top: 5,
-              right: 20, 
-              left: 10, 
+              right: 20,
+              left: 10,
               bottom: 5,
             }}
           >
@@ -104,17 +114,12 @@ export function SpendingTrendChart() {
               tickLine={false}
               axisLine={false}
               tickFormatter={currencyFormatter}
-              width={80} 
+              width={80}
             />
             <Tooltip
               cursor={{ stroke: 'hsl(var(--accent))', strokeWidth: 1 }}
-              contentStyle={{
-                backgroundColor: 'hsl(var(--background))',
-                borderColor: 'hsl(var(--border))',
-                borderRadius: 'var(--radius)',
-                boxShadow: 'var(--shadow-md)',
-              }}
-              labelFormatter={(label) => format(new Date(label), "PPP")} 
+              contentStyle={tooltipContentStyle}
+              labelFormatter={(label) => format(new Date(label), "PPP")}
               formatter={(value: number) => [value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }), "Spent"]}
             />
             <Legend wrapperStyle={{fontSize: '12px'}}/>
@@ -124,8 +129,8 @@ export function SpendingTrendChart() {
               name="Total Spent"
               stroke="hsl(var(--primary))"
               strokeWidth={2}
-              dot={{ r: 3, strokeWidth: 1, fill: 'hsl(var(--primary))' }}
-              activeDot={{ r: 5, strokeWidth: 2 }}
+              dot={lineDotStyle}
+              activeDot={lineActiveDotStyle}
             />
           </LineChart>
         </ResponsiveContainer>
