@@ -14,8 +14,9 @@ import {
   updateDoc,
   deleteDoc,
   query,
-  where,
   getDocs,
+  getDoc,
+  setDoc,
   Timestamp,
   orderBy,
   writeBatch,
@@ -24,6 +25,7 @@ import {
 type AppState = {
   expenses: Expense[];
   budgets: Budget[];
+  notes: string; // Added for notes
   isLoading: boolean;
   isInitialized: boolean; // Tracks if user data has been loaded for the current session
   userId: string | null; // Store current user ID
@@ -38,11 +40,15 @@ type AppState = {
   addBudget: (budgetData: Omit<Budget, 'id' | 'spent' | 'remaining'>) => Promise<Budget>;
   updateBudget: (budgetData: Omit<Budget, 'id' | 'spent' | 'remaining'> & {id: string}) => Promise<void>;
   deleteBudget: (id: string) => Promise<void>;
+
+  fetchUserNotes: (userId: string) => Promise<string>;
+  saveUserNotes: (userId: string, notesContent: string) => Promise<void>;
 };
 
 const useDataStore = create<AppState>((set, get) => ({
   expenses: [],
   budgets: [],
+  notes: "", // Initial notes state
   isLoading: false,
   isInitialized: false,
   userId: null,
@@ -53,8 +59,9 @@ const useDataStore = create<AppState>((set, get) => ({
       return;
     }
     console.log("Data store: Initializing user session for", userId);
-    set({ isLoading: true, userId, isInitialized: false, expenses: [], budgets: [] }); // Clear previous data for new user
+    set({ isLoading: true, userId, isInitialized: false, expenses: [], budgets: [], notes: "" }); // Clear previous data
     try {
+      // Fetch Expenses
       const expensesQuery = query(
         collection(db, `users/${userId}/expenses`),
         orderBy("date", "desc")
@@ -69,6 +76,7 @@ const useDataStore = create<AppState>((set, get) => ({
         } as Expense;
       });
 
+      // Fetch Budgets
       const budgetsQuery = query(collection(db, `users/${userId}/budgets`));
       const budgetsSnapshot = await getDocs(budgetsQuery);
       const userBudgets: Budget[] = budgetsSnapshot.docs.map(docSnap => {
@@ -81,17 +89,62 @@ const useDataStore = create<AppState>((set, get) => ({
         } as Budget;
       });
 
-      set({ expenses: userExpenses, budgets: userBudgets, isLoading: false, isInitialized: true });
+      // Fetch Notes
+      const userNotes = await get().fetchUserNotes(userId);
+
+      set({ expenses: userExpenses, budgets: userBudgets, notes: userNotes, isLoading: false, isInitialized: true });
       console.log("Data store: User session initialized successfully for", userId);
     } catch (error) {
       console.error("Data store: Error loading user data from Firestore:", error);
-      set({ isLoading: false, isInitialized: false }); 
+      set({ isLoading: false, isInitialized: false, notes: "" }); 
+      // We could throw the error here if we want AppLayout to handle it,
+      // or set an error state in the store.
     }
   },
 
   clearUserSession: () => {
     console.log("Data store: Clearing user session.");
-    set({ expenses: [], budgets: [], isLoading: false, isInitialized: false, userId: null });
+    set({ expenses: [], budgets: [], notes: "", isLoading: false, isInitialized: false, userId: null });
+  },
+
+  fetchUserNotes: async (userId) => {
+    if (!userId) {
+      console.warn("Data store: No user ID provided for fetching notes.");
+      return "";
+    }
+    const notesPath = `users/${userId}/userNotes/main`;
+    console.log(`Data store: Attempting to fetch notes for userId: ${userId} from path: ${notesPath}`);
+    try {
+      const noteDocRef = doc(db, notesPath);
+      const noteSnap = await getDoc(noteDocRef);
+      if (noteSnap.exists()) {
+        return noteSnap.data().content || "";
+      }
+      return ""; // No notes found
+    } catch (error) {
+      console.error(`Data store: Error fetching notes from Firestore at path ${notesPath}:`, error);
+      // Optionally rethrow or handle specific error types
+      return ""; // Return empty on error for now
+    }
+  },
+
+  saveUserNotes: async (userId, notesContent) => {
+    if (!userId) {
+      console.error("Data store: No user ID found, cannot save notes.");
+      throw new Error("User not authenticated. Cannot save notes.");
+    }
+    const notesPath = `users/${userId}/userNotes/main`;
+    console.log(`Data store: Attempting to save notes for userId: ${userId} to path: ${notesPath}`);
+    set({ isLoading: true }); // Can have a separate loading state for notes if needed
+    try {
+      const noteDocRef = doc(db, notesPath);
+      await setDoc(noteDocRef, { content: notesContent, updatedAt: Timestamp.now() });
+      set({ notes: notesContent, isLoading: false });
+    } catch (error: any) {
+      console.error(`Data store: Error saving notes to Firestore at path ${notesPath}:`, error);
+      set({ isLoading: false });
+      throw error; // Re-throw to be caught by the form
+    }
   },
 
   addExpense: async (expenseData) => {
@@ -120,7 +173,7 @@ const useDataStore = create<AppState>((set, get) => ({
         isLoading: false,
       }));
       return newExpense;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Data store: Error adding expense to Firestore at path ${expensePath}:`, error);
       set({ isLoading: false });
       throw error; 
@@ -156,7 +209,7 @@ const useDataStore = create<AppState>((set, get) => ({
         ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
         isLoading: false,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Data store: Error updating expense in Firestore at path ${expensePath}:`, error);
       set({ isLoading: false });
       throw error; 
@@ -178,7 +231,7 @@ const useDataStore = create<AppState>((set, get) => ({
         expenses: state.expenses.filter((exp) => exp.id !== id),
         isLoading: false,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Data store: Error deleting expense from Firestore at path ${expensePath}:`, error);
       set({ isLoading: false });
       throw error; 
@@ -207,7 +260,7 @@ const useDataStore = create<AppState>((set, get) => ({
         isLoading: false,
       }));
       return newBudget;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Data store: Error adding budget to Firestore at collection ${budgetPath}:`, error);
       set({ isLoading: false });
       throw error; 
@@ -229,11 +282,11 @@ const useDataStore = create<AppState>((set, get) => ({
       await updateDoc(budgetRef, dataToUpdate);
       set((state) => ({
         budgets: state.budgets.map((b) =>
-          b.id === budgetData.id ? { ...b, ...dataToUpdate } : b // ...dataToUpdate already excludes spent and remaining
+          b.id === budgetData.id ? { ...b, ...dataToUpdate } : b 
         ),
         isLoading: false,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Data store: Error updating budget in Firestore at path ${budgetPath}:`, error);
       set({ isLoading: false });
       throw error; 
@@ -255,7 +308,7 @@ const useDataStore = create<AppState>((set, get) => ({
         budgets: state.budgets.filter((b) => b.id !== id),
         isLoading: false,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Data store: Error deleting budget from Firestore at path ${budgetPath}:`, error);
       set({ isLoading: false });
       throw error; 
@@ -265,7 +318,7 @@ const useDataStore = create<AppState>((set, get) => ({
 
 
 export const useCalculatedData = () => {
-  const { expenses, budgets, isLoading, isInitialized, userId } = useDataStore();
+  const { expenses, budgets, isLoading, isInitialized, userId, notes } = useDataStore();
 
   const getTotalSpending = React.useCallback(() => {
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -325,6 +378,7 @@ export const useCalculatedData = () => {
   return {
     expenses,
     budgets,
+    notes, // expose notes
     isLoading,
     isInitialized,
     userId,

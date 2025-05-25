@@ -25,9 +25,10 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true); // Set loading true at the start of auth state change
       setUser(currentUser);
       if (currentUser) {
-        await initializeUserSession(currentUser.uid);
+        await initializeUserSession(currentUser.uid); // This now fetches expenses, budgets, AND notes
       } else {
         clearUserSession();
       }
@@ -41,15 +42,17 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
       // onAuthStateChanged will handle setting user and initializing session
+      // setUser(userCredential.user); // Let onAuthStateChanged handle this
+      // await initializeUserSession(userCredential.user.uid); // Let onAuthStateChanged handle this
       return userCredential.user;
     } catch (error) {
       console.error("Error signing in:", error);
       // setUser(null); // onAuthStateChanged handles this
       clearUserSession();
+      setLoading(false); // Ensure loading is false if signIn itself errors before onAuthStateChanged
       throw error; 
-    } finally {
-      // setLoading(false); // onAuthStateChanged handles final loading state
-    }
+    } 
+    // setLoading(false) will be called by onAuthStateChanged's effect
   };
 
   const signOut = async () => {
@@ -61,6 +64,7 @@ export const AuthProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       console.error("Error signing out:", error);
       // setLoading(false); // Ensure loading is false if signOut itself errors before onAuthStateChanged
     }
+    // setLoading(false) will be called by onAuthStateChanged's effect
   };
 
   return (
