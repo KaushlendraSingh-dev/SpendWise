@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { siteConfig } from "@/config/site";
 import type { Budget } from "@/lib/types";
 import React, { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 
 const budgetFormSchema = z.object({
@@ -36,17 +37,17 @@ const budgetFormSchema = z.object({
 type BudgetFormValues = z.infer<typeof budgetFormSchema>;
 
 interface BudgetFormProps {
-  budget?: Budget; // For editing
+  budget?: Budget; 
   onFormSubmit?: () => void;
   setOpen?: (open: boolean) => void;
 }
 
 export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
-  const { addBudget, updateBudget, budgets } = useDataStore();
+  const { addBudget, updateBudget, budgets: allBudgetsFromStore } = useDataStore(); // Renamed for clarity
   const { getAllCategories } = useCalculatedData();
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const defaultValues: Partial<BudgetFormValues> = budget
     ? {
@@ -59,18 +60,17 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
       };
   
   useEffect(() => {
-    const allCats = getAllCategories();
+    const allSystemCategories = getAllCategories();
     if (budget) {
-      // When editing, the Select is disabled. We only need budget.category in the list
-      // for the Select component to render its current value correctly.
+      // When editing, only the budget's current category is needed for the Select, as it's disabled.
       setAvailableCategories([budget.category]);
     } else {
-      // When adding, show categories that are not yet budgeted.
-      const existingBudgetedCategories = budgets.map(b => b.category);
-      const categoriesForSelect = allCats.filter(cat => !existingBudgetedCategories.includes(cat));
+      // When adding, show categories from system config that are not yet budgeted.
+      const existingBudgetedCategories = allBudgetsFromStore.map(b => b.category);
+      const categoriesForSelect = allSystemCategories.filter(cat => !existingBudgetedCategories.includes(cat));
       setAvailableCategories(categoriesForSelect);
     }
-  }, [getAllCategories, budgets, budget]);
+  }, [getAllCategories, allBudgetsFromStore, budget]);
 
 
   const form = useForm<BudgetFormValues>({
@@ -78,22 +78,40 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
     defaultValues,
   });
 
-  function onSubmit(data: BudgetFormValues) {
-    if (budget) { // Editing existing budget
-      updateBudget({ ...budget, ...data });
-      toast({ title: "Budget Updated", description: `Budget for ${data.category} updated successfully.` });
-    } else { // Adding new budget
-      const existingBudget = budgets.find(b => b.category === data.category);
-      if (existingBudget) {
-        form.setError("category", { message: "A budget for this category already exists."});
-        return;
+  async function onSubmit(data: BudgetFormValues) {
+    setIsSubmitting(true);
+    const budgetPayload = {
+      category: data.category,
+      amount: data.amount,
+    };
+
+    try {
+      if (budget) { 
+        await updateBudget({ id: budget.id, ...budgetPayload });
+        toast({ title: "Budget Updated", description: `Budget for ${data.category} updated successfully.` });
+      } else { 
+        const existingBudget = allBudgetsFromStore.find(b => b.category === data.category);
+        if (existingBudget) {
+          form.setError("category", { message: "A budget for this category already exists."});
+          setIsSubmitting(false); // Reset submitting state if there's a validation error
+          return;
+        }
+        await addBudget(budgetPayload);
+        toast({ title: "Budget Set", description: `Budget for ${data.category} set successfully.` });
+        form.reset({ category: "", amount: "" as any }); 
       }
-      addBudget(data);
-      toast({ title: "Budget Set", description: `Budget for ${data.category} set successfully.` });
-      form.reset({ category: "", amount: "" as any }); 
+      onFormSubmit?.();
+      setOpen?.(false);
+    } catch (error: any) {
+      console.error("Budget form submission error:", error);
+      toast({
+        title: budget ? "Update Failed" : "Set Budget Failed",
+        description: error.message || "Could not save budget. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    onFormSubmit?.();
-    setOpen?.(false);
   }
 
   return (
@@ -105,18 +123,28 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!budget}>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value} 
+                disabled={!!budget || isSubmitting}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category for budget" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {availableCategories.map((cat) => (
-                     <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {availableCategories.length > 0 ? (
+                    availableCategories.map((cat) => (
+                       <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no_category" disabled>
+                      {budget ? budget.category : "No new categories available"}
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -130,16 +158,22 @@ export function BudgetForm({ budget, onFormSubmit, setOpen }: BudgetFormProps) {
             <FormItem>
               <FormLabel>Budget Amount (₹)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                <Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting}/>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          {budget ? "Update Budget" : "Set Budget"}
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
+          ) : (
+            budget ? "Update Budget" : "Set Budget"
+          )}
         </Button>
       </form>
     </Form>
   );
 }
+
+    

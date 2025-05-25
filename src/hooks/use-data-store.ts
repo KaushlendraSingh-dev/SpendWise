@@ -31,12 +31,12 @@ type AppState = {
   initializeUserSession: (userId: string) => Promise<void>;
   clearUserSession: () => void;
 
-  addExpense: (expenseData: Omit<Expense, 'id' | 'date'> & { date: Date }) => Promise<Expense | null>;
-  updateExpense: (expenseData: Omit<Expense, 'date'> & { date: Date }) => Promise<void>;
+  addExpense: (expenseData: Omit<Expense, 'id' | 'date'> & { date: Date }) => Promise<Expense>;
+  updateExpense: (expenseData: Omit<Expense, 'date'> & { id: string, date: Date }) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
 
-  addBudget: (budgetData: Omit<Budget, 'id' | 'spent' | 'remaining'>) => Promise<Budget | null>;
-  updateBudget: (budgetData: Omit<Budget, 'id' | 'spent' | 'remaining'>) => Promise<void>;
+  addBudget: (budgetData: Omit<Budget, 'id' | 'spent' | 'remaining'>) => Promise<Budget>;
+  updateBudget: (budgetData: Omit<Budget, 'id' | 'spent' | 'remaining'> & {id: string}) => Promise<void>;
   deleteBudget: (id: string) => Promise<void>;
 };
 
@@ -48,7 +48,7 @@ const useDataStore = create<AppState>((set, get) => ({
   userId: null,
 
   initializeUserSession: async (userId) => {
-    if (get().isInitialized && get().userId === userId) return; // Already initialized for this user
+    if (get().isInitialized && get().userId === userId && !get().isLoading) return; 
 
     set({ isLoading: true, userId, isInitialized: false });
     try {
@@ -73,15 +73,17 @@ const useDataStore = create<AppState>((set, get) => ({
         return {
           id: docSnap.id,
           ...data,
-          spent: 0, // Will be recalculated
-          remaining: 0, // Will be recalculated
+          // These will be dynamically calculated by selectors/hooks
+          spent: 0, 
+          remaining: 0, 
         } as Budget;
       });
 
       set({ expenses: userExpenses, budgets: userBudgets, isLoading: false, isInitialized: true });
     } catch (error) {
       console.error("Error loading user data from Firestore:", error);
-      set({ isLoading: false, isInitialized: false }); // Indicate loading failed but session was attempted
+      set({ isLoading: false, isInitialized: false }); // Indicate loading failed
+      // Consider showing a global error toast here if critical data fails to load
     }
   },
 
@@ -93,18 +95,20 @@ const useDataStore = create<AppState>((set, get) => ({
     const userId = get().userId;
     if (!userId) {
       console.error("No user ID found, cannot add expense.");
-      return null;
+      throw new Error("User not authenticated. Cannot add expense.");
     }
     set({ isLoading: true });
     try {
       const docRef = await addDoc(collection(db, `users/${userId}/expenses`), {
         ...expenseData,
-        date: Timestamp.fromDate(expenseData.date), // Store as Firestore Timestamp
+        date: Timestamp.fromDate(expenseData.date), 
       });
       const newExpense: Expense = {
         id: docRef.id,
-        ...expenseData,
-        date: expenseData.date.toISOString(), // Keep ISO string in local state for consistency
+        description: expenseData.description,
+        amount: expenseData.amount,
+        category: expenseData.category,
+        date: expenseData.date.toISOString(), 
       };
       set((state) => ({
         expenses: [...state.expenses, newExpense].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -114,7 +118,7 @@ const useDataStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error("Error adding expense to Firestore:", error);
       set({ isLoading: false });
-      return null;
+      throw error; // Re-throw the error to be caught by the form
     }
   },
 
@@ -122,17 +126,22 @@ const useDataStore = create<AppState>((set, get) => ({
     const userId = get().userId;
     if (!userId) {
       console.error("No user ID found, cannot update expense.");
-      return;
+      throw new Error("User not authenticated. Cannot update expense.");
     }
     set({ isLoading: true });
     try {
       const expenseRef = doc(db, `users/${userId}/expenses`, expenseData.id);
+      // Create a new object for Firestore without the 'id' field itself
+      const { id, ...dataToUpdate } = expenseData;
       await updateDoc(expenseRef, {
-        ...expenseData,
+        ...dataToUpdate,
         date: Timestamp.fromDate(expenseData.date),
       });
       const updatedExpense: Expense = {
-        ...expenseData,
+        id: expenseData.id,
+        description: expenseData.description,
+        amount: expenseData.amount,
+        category: expenseData.category,
         date: expenseData.date.toISOString(),
       };
       set((state) => ({
@@ -144,6 +153,7 @@ const useDataStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error("Error updating expense in Firestore:", error);
       set({ isLoading: false });
+      throw error; 
     }
   },
 
@@ -151,7 +161,7 @@ const useDataStore = create<AppState>((set, get) => ({
     const userId = get().userId;
     if (!userId) {
       console.error("No user ID found, cannot delete expense.");
-      return;
+      throw new Error("User not authenticated. Cannot delete expense.");
     }
     set({ isLoading: true });
     try {
@@ -163,6 +173,7 @@ const useDataStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error("Error deleting expense from Firestore:", error);
       set({ isLoading: false });
+      throw error; 
     }
   },
 
@@ -170,7 +181,7 @@ const useDataStore = create<AppState>((set, get) => ({
     const userId = get().userId;
     if (!userId) {
       console.error("No user ID found, cannot add budget.");
-      return null;
+      throw new Error("User not authenticated. Cannot add budget.");
     }
     set({ isLoading: true });
     try {
@@ -178,8 +189,8 @@ const useDataStore = create<AppState>((set, get) => ({
       const newBudget: Budget = {
         id: docRef.id,
         ...budgetData,
-        spent: 0,
-        remaining: budgetData.amount,
+        spent: 0, 
+        remaining: budgetData.amount, 
       };
       set((state) => ({
         budgets: [...state.budgets, newBudget],
@@ -189,7 +200,7 @@ const useDataStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error("Error adding budget to Firestore:", error);
       set({ isLoading: false });
-      return null;
+      throw error; 
     }
   },
 
@@ -197,21 +208,23 @@ const useDataStore = create<AppState>((set, get) => ({
     const userId = get().userId;
     if (!userId) {
       console.error("No user ID found, cannot update budget.");
-      return;
+      throw new Error("User not authenticated. Cannot update budget.");
     }
     set({ isLoading: true });
     try {
       const budgetRef = doc(db, `users/${userId}/budgets`, budgetData.id);
-      await updateDoc(budgetRef, budgetData);
+      const { id, spent, remaining, ...dataToUpdate } = budgetData; // Exclude dynamic fields from Firestore write
+      await updateDoc(budgetRef, dataToUpdate);
       set((state) => ({
         budgets: state.budgets.map((b) =>
-          b.id === budgetData.id ? { ...b, ...budgetData } : b // spent/remaining will be recalculated by selectors
+          b.id === budgetData.id ? { ...b, ...budgetData } : b 
         ),
         isLoading: false,
       }));
     } catch (error) {
       console.error("Error updating budget in Firestore:", error);
       set({ isLoading: false });
+      throw error; 
     }
   },
 
@@ -219,7 +232,7 @@ const useDataStore = create<AppState>((set, get) => ({
     const userId = get().userId;
     if (!userId) {
       console.error("No user ID found, cannot delete budget.");
-      return;
+      throw new Error("User not authenticated. Cannot delete budget.");
     }
     set({ isLoading: true });
     try {
@@ -231,13 +244,14 @@ const useDataStore = create<AppState>((set, get) => ({
     } catch (error) {
       console.error("Error deleting budget from Firestore:", error);
       set({ isLoading: false });
+      throw error; 
     }
   },
 }));
 
-// Selectors remain largely the same, but now depend on the Zustand state that's populated from Firestore
+
 export const useCalculatedData = () => {
-  const { expenses, budgets, isLoading, isInitialized } = useDataStore();
+  const { expenses, budgets, isLoading, isInitialized, userId } = useDataStore();
 
   const getTotalSpending = React.useCallback(() => {
     return expenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -259,7 +273,7 @@ export const useCalculatedData = () => {
     const categoriesFromExpenses = expenses.map(e => e.category);
     const categoriesFromBudgets = budgets.map(b => b.category);
     const allUniqueCategories = Array.from(new Set([...siteConfig.defaultCategories, ...categoriesFromExpenses, ...categoriesFromBudgets]));
-    return allUniqueCategories.sort();
+    return allUniqueCategories.sort((a,b) => a.localeCompare(b));
   }, [expenses, budgets]);
 
   const getBudgetProgress = React.useCallback((): Budget[] => {
@@ -268,7 +282,7 @@ export const useCalculatedData = () => {
       const spent = spendingByCategoryData[budget.category] || 0;
       const remaining = budget.amount - spent;
       return { ...budget, spent, remaining };
-    });
+    }).sort((a,b) => a.category.localeCompare(b.category));
   }, [budgets, getSpendingByCategory]);
 
   const getSpendingOverTime = React.useCallback(() => {
@@ -299,6 +313,7 @@ export const useCalculatedData = () => {
     budgets,
     isLoading,
     isInitialized,
+    userId,
     getTotalSpending,
     getSpendingByCategory,
     getBudgetProgress,
@@ -309,3 +324,5 @@ export const useCalculatedData = () => {
 };
 
 export { useDataStore };
+
+    

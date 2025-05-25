@@ -44,9 +44,9 @@ const expenseFormSchema = z.object({
 type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
 interface ExpenseFormProps {
-  expense?: Expense; // For editing
-  onFormSubmit?: () => void; // Callback after successful submission
-  setOpen?: (open: boolean) => void; // To close dialog/sheet
+  expense?: Expense; 
+  onFormSubmit?: () => void; 
+  setOpen?: (open: boolean) => void; 
 }
 
 export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps) {
@@ -55,6 +55,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const { toast } = useToast();
   const [isSuggesting, setIsSuggesting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setAvailableCategories(getAllCategories());
@@ -82,20 +83,36 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
   const descriptionValue = form.watch("description");
 
   async function onSubmit(data: ExpenseFormValues) {
-    const expenseData = {
-      ...data,
-      date: data.date.toISOString(),
+    setIsSubmitting(true);
+    // Ensure data.date is a Date object for the store functions
+    const expensePayload = {
+      description: data.description,
+      amount: data.amount,
+      category: data.category,
+      date: data.date, // This is already a Date object from react-hook-form
     };
-    if (expense) {
-      updateExpense({ ...expense, ...expenseData });
-      toast({ title: "Expense Updated", description: "Your expense has been successfully updated." });
-    } else {
-      addExpense(expenseData);
-      toast({ title: "Expense Added", description: "New expense logged successfully." });
-      form.reset({description: "", amount: "" as any, category: "", date: new Date() }); 
+
+    try {
+      if (expense) {
+        await updateExpense({ id: expense.id, ...expensePayload });
+        toast({ title: "Expense Updated", description: "Your expense has been successfully updated." });
+      } else {
+        await addExpense(expensePayload);
+        toast({ title: "Expense Added", description: "New expense logged successfully." });
+        form.reset({description: "", amount: "" as any, category: "", date: new Date() }); 
+      }
+      onFormSubmit?.();
+      setOpen?.(false);
+    } catch (error: any) {
+      console.error("Expense form submission error:", error);
+      toast({ 
+        title: expense ? "Update Failed" : "Add Failed", 
+        description: error.message || "Could not save expense. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    onFormSubmit?.();
-    setOpen?.(false);
   }
 
   const handleSuggestCategory = async () => {
@@ -107,18 +124,22 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
     const formData = new FormData();
     formData.append('description', descriptionValue);
     
-    const result = await handleSuggestCategoryAction(null, formData);
-    setIsSuggesting(false);
-
-    if (result.error) {
-      toast({ title: "Suggestion Failed", description: result.error, variant: "destructive" });
-    } else if (result.category) {
-      form.setValue("category", result.category, { shouldValidate: true });
-      // Add to available categories if it's new
-      if (!availableCategories.includes(result.category)) {
-        setAvailableCategories(prev => [...prev, result.category!].sort());
+    try {
+      const result = await handleSuggestCategoryAction(null, formData);
+      if (result.error) {
+        toast({ title: "Suggestion Failed", description: result.error, variant: "destructive" });
+      } else if (result.category) {
+        form.setValue("category", result.category, { shouldValidate: true });
+        if (!availableCategories.includes(result.category)) {
+          setAvailableCategories(prev => [...prev, result.category!].sort());
+        }
+        toast({ title: "Category Suggested!", description: `We think '${result.category}' is a good fit (Confidence: ${Math.round((result.confidence || 0)*100)}%).` });
       }
-      toast({ title: "Category Suggested!", description: `We think '${result.category}' is a good fit (Confidence: ${Math.round((result.confidence || 0)*100)}%).` });
+    } catch (error: any) {
+        console.error("AI Suggestion Error:", error);
+        toast({ title: "Suggestion Error", description: "Could not get AI suggestion.", variant: "destructive"})
+    } finally {
+        setIsSuggesting(false);
     }
   };
 
@@ -133,13 +154,13 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <div className="flex gap-2">
-                <Input placeholder="e.g., Coffee with a friend" {...field} />
+                <Input placeholder="e.g., Coffee with a friend" {...field} disabled={isSubmitting} />
                 <Button 
                     type="button" 
                     variant="outline" 
                     size="icon" 
                     onClick={handleSuggestCategory}
-                    disabled={isSuggesting || !descriptionValue || descriptionValue.length < 3}
+                    disabled={isSuggesting || isSubmitting || !descriptionValue || descriptionValue.length < 3}
                     title="Suggest Category (AI)"
                 >
                     <Sparkles className={cn("h-4 w-4", isSuggesting && "animate-pulse")} />
@@ -157,7 +178,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
             <FormItem>
               <FormLabel>Amount (₹)</FormLabel>
               <FormControl>
-                <Input type="number" step="0.01" placeholder="0.00" {...field} />
+                <Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -169,7 +190,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
@@ -202,6 +223,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
                         "w-full pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isSubmitting}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
@@ -218,7 +240,7 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
                     selected={field.value}
                     onSelect={field.onChange}
                     disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
+                      date > new Date() || date < new Date("1900-01-01") || isSubmitting
                     }
                     initialFocus
                   />
@@ -228,10 +250,16 @@ export function ExpenseForm({ expense, onFormSubmit, setOpen }: ExpenseFormProps
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          {expense ? "Update Expense" : "Add Expense"}
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
+          ) : (
+            expense ? "Update Expense" : "Add Expense"
+          )}
         </Button>
       </form>
     </Form>
   );
 }
+
+    
