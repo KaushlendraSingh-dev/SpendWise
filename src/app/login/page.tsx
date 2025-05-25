@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, LogIn, UserPlus } from 'lucide-react'; // Added UserPlus
+import { Sparkles, LogIn } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import Link from 'next/link'; // Added Link
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -97,6 +97,11 @@ export default function LoginPage() {
                 required
                 disabled={isSubmitting}
               />
+            </div>
+            <div className="text-sm text-right">
+              <Link href="/forgot-password" className="font-medium text-primary hover:underline">
+                Forgot Password?
+              </Link>
             </div>
             <Button type="submit" className="w-full text-lg py-6 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isSubmitting || loading}>
               {isSubmitting ? (
