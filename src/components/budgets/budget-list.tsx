@@ -64,9 +64,9 @@ export function BudgetList() {
         }}
       >
         <ScrollArea className={cn(
-          "h-auto max-h-[300px] sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]",
+          "h-auto sm:max-h-[450px] md:max-h-[550px] lg:max-h-[600px]", // Removed max-h-[300px] for base
           "border rounded-md shadow-sm",
-          "hover:scale-105 hover:shadow-xl hover:border-accent transition-all duration-300 ease-in-out"
+          "hover:shadow-xl hover:border-accent transition-all duration-300 ease-in-out" // Removed hover:scale-105
           )}>
           <Table>
             <TableHeader>
@@ -100,7 +100,7 @@ export function BudgetList() {
                          <Progress
                             value={Math.min(progressValue,100)}
                             className={cn(
-                              "w-[80px] sm:w-[100px] h-3", 
+                              "w-[60px] sm:w-[80px] md:w-[100px] h-3", 
                               isOverBudget
                                 ? "[&>div]:bg-destructive"
                                 : progressValue >= 70
@@ -202,3 +202,4 @@ export function BudgetList() {
     </>
   );
 }
+
